@@ -1,0 +1,327 @@
+INTRODUCTION
+############
+
+This document explains all the steps needed to create distro11s for the
+different supported Targets (qemu, jr, zotac).
+
+For this, we will use a USB memory stick (512mb) and a regular debian image.
+
+
+
+INSTALLING THE BASE SYSTEM
+##########################
+
+0- DOWNLOAD THE IMAGE
+
+For this we are going to use the CD1:
+
+http://cdimage.debian.org/debian-cd/6.0.2.1/amd64/iso-cd/debian-6.0.2.1-amd64-CD-1.iso
+
+We only need the first CD of the series. It cointains all the packages needed
+to install the system. Afterwards, we will use apt-get/aptitude to install
+extra packages.
+
+1- PREPARE THE USB STICK:
+
+Insert the USB key in any linux ready machine and unmount it (in case it is mounted
+automatically). Then:
+
+  $ sudo fdisk -l
+
+From the ouput, see what is the correct device name of the USB KEY. In this case
+it will be /dev/sdd. Next: 
+
+  $ cat debian-6.0.2.1-amd64-CD-1.iso > /dev/sdd (1*)
+  $ sync
+
+  1* This can take several mins
+
+2- BOOTING
+
+Now connect the USB stick to the target system and boot from USB.
+For ZOTAC boards, press F11 at boot time to load a BBS
+Select the memory USB memory stick
+Install debian
+Reboot
+
+Source: http://www.debian.org/releases/stable/amd64/ch04s03.html.en
+
+PS: netinstall image did not work for this target.
+
+
+
+PACKAGES NEEDED ON THE TARGET
+#############################
+
+Now, we will install some packages/utilities in the target machine. These
+packages are not 100% required but they are strongly recommended. If any of
+these is not available for your target, please install a similar one.
+
+ - Delete/Comment CD sources from /etc/apt/source.list
+
+ - Activate mDNS / ZeroConf
+
+   TARGET# apt-get install avahi-daemon avahi-discover libnss-mdns
+
+ - Install basic tools: vim, sudo, sshfs, make, gcc, tcpdump and wireless-tools
+
+   TARGET# apt-get install vim sudo sshfs make gcc tcpdump wireless-tools
+
+
+
+CONFIGURE SSHFS
+###############
+
+We will mount the target's hard drive through sshfs in order to install on it
+the modules/kernel everytime we re/build them.
+
+Install your public key in the target machine:
+
+  TARGET$ su
+  TARGET# mkdir .ssh
+  TARGET# chmod 700 .ssh
+  TARGET# cd .ssh
+  TARGET# scp <valid_user>@<yourhost>.local:.ssh/id_dsa.pub ./authorized_keys
+  TARGET# chmod 755 authorized_keys
+
+From the development machine:
+
+  DEV$ sudo apt-get install sshfs
+  DEV$ sudo gpasswd -a $USER fuse
+  DEV$ mkdir $TARGET_HD
+  ( TARGET_HD is the path where target file system will be mounted)
+
+Finally, mount the target file system on the dev machine, using the next command:
+
+  DEV$ sshfs -o idmap=user root@zotac-01.local:/ $TARGET_HD
+
+To unmount it:
+
+  DEV$ fusermount -u $TARGET_HD
+
+
+
+WORKING WITH THE KERNEL
+#######################
+
+The kernel's code will live on the dev machine. We will do all the work in the
+kernel from the dev station (develeopment/building/etc). Finally, we will
+install the built kernel/modules in the target system.
+
+  DEV$ mkdir testbed DEV$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing
+  DEV$ cd wireless-testing
+
+Now we can modify the kernel code: apply patches, etc. Skip this steps if you
+don't want or need to change anything.
+
+  - Patch1 --> Send To Self
+
+    I applied this patch in order to test the mesh stack using one single zotac
+node and different wifi cards
+
+    DEV$ wget http://o11s.org/files/0001-send-to-self-3.0.0-rc2.patch 
+    DEV$ git apply --check 0001-send-to-self-3.0.0-rc2.patch 
+    (to make sure that the patch applies correctly) 
+    DEV$ git am 0001-send-to-self-3.0.0-rc2.patch (ignore warnings)
+
+  - Patch2 --> 0001-ath9k_htc-Add-support-for-NL80211_IFTYPE_MESH_POINT-.patch
+
+    This patch adds mesh support to the ath9k_htc chipsets
+     
+   .
+   .
+   .
+  
+  - PatchN
+
+Next, create a .config file needed to build the kernel:
+
+  DEV$ make defconfig
+
+This will generate a default kernel config file. Now customize this config file
+to support different hardware/services needed (like mesh, etc).
+
+  CREATING A CONFIG FILE FOR QEMU:
+  -------------------------------
+
+  We need to activate support for the next hardware/services:
+
+   - Mesh (802.11s)
+   - HWSIM (hardware simulation)
+   - Fuse File System
+
+  A customized .config file for QEMU targets is available in:
+
+    $DISTRO11S/board/qemu/qemu_kenel.config
+
+
+  CREATING A CONFIG FILE FOR ZOTAC BOARDS:
+  ---------------------------------------
+
+  We need to activate support for the next hardware/services:
+
+   - Mesh (802.11s)
+   - Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI
+     Express Gigabit Ethernet controller
+   - Ath9k and ath9k_htc chipsets
+  
+  A customized .config file for ZOTAC boards is available in:
+  
+    $DISTRO11S/board/zotac/zotac_kenel.config
+
+  ----------------------------------------
+
+Once we have our config file ready customized, then build the kernel:
+
+  DEV$ make -j 4
+
+Next, install the kernel and the modules to your sshfs
+
+  DEV$ cp arch/x86/boot/bzImage $TARGET_HD/boot/vmlinuz-<version>-<architecture>
+  DEV$ INSTALL_MOD_PATH=$TARGET_HD make modules_install
+
+  ie: 
+  DEV$ cp arch/x86/boot/bzImage $TARGET_HD/boot/vmlinuz-3.0.0-rc6-amd64
+
+Finally add an entry in grub for this new kernel:
+
+  DEV$ vim $TARGET_HD/boot/grub/grub.cfg
+
+Add something like this:
+
+-------------
+
+### BEGIN /etc/grub.d/10_linux ###
++  menuentry 'distro11s GNU/Linux, with Linux 3.0.0-rc6-amd64 (wireless-testing)' --class debian --class gnu-linux --class gnu --class os {
++        insmod part_msdos
++        insmod ext2
++        set root='(hd0,msdos1)'
++        search --no-floppy --fs-uuid --set 17c1accb-21f4-4c43-b340-f62609891315
++        echo    'Loading Linux 2.6.32-5-amd64 ...'
++        linux   /boot/vmlinuz-3.0.0-rc6-amd64 root=UUID=17c1accb-21f4-4c43-b340-f62609891315 ro  quiet
++        echo    'Loading initial ramdisk ...'
++        initrd  /boot/initrd.img-2.6.32-5-amd64
++ }
+menuentry 'Debian GNU/Linux, with Linux 2.6.32-5-amd64' --class debian --class gnu-linux --class gnu --class os {
+        insmod part_msdos
+
+--------------
+
+After all this process reboot the target device and test it!
+
+
+
+CREATE DEB PACKAGES WITH THE LAST VERSION OF THE REQUIRED TOOLS:
+###############################################################
+
+Now, we are going to download the last version of some lib/tools needed to
+deploy a mesh network. Some of these packages are: libnl, iw, authsae, etc The
+goal of this step is build those packages and then create a deb package. This
+will make the installation process of this tools much easier.
+
+  1- LIBNL 
+
+  WARNINGS!!!!!! 
+  ##############
+   - I don't know why we need libnl v3
+   - Apparently when installing the deb I created, it has some conflicts with
+     libnl1-dev & libnl2-dev. The installation of this deb will fail if any of these
+     packages is installed, and viceversa.
+   - The weird thing is that if I install this last version of libnl with
+     "make install", then everything works!
+
+    DEV$ git clone git://git.kernel.org/pub/scm/libs/netlink/libnl.git
+    DEV$ cd libnl
+    DEV$ ./autogen.sh (1*)
+    DEV$ ./configure --prefix=/usr (2*)
+    DEV$ make -j4
+
+    Then create the deb package: 
+
+    DEV$ sudo aptitude install checkinstall
+    DEV$ sudo checkinstall -D --fstrans=no
+    (introduce the right email, pckg name, version, dependencies, etc)
+   
+    Notes: 
+ 
+    1* I had to install the next packages in order to run ./autogen.sh:
+         DEV$ aptitude install automake
+         (DEV$ aptitutde install dh-autoreconf)
+
+    2* I had to install the next packages for the .configure to succeed:
+         DEV$ aptitude install python-dev swig
+
+
+  2- IW  
+
+    DEV$ git clone http://git.sipsolutions.net/iw.git
+    DEV$ cd iw
+    DEV$ sudo aptitude install libnl2 libnl2-dev
+    DEV$ make
+
+    Once it is built, create the package:
+
+    DEV$ sudo checkinstall -D
+    (introduce the right email, pckg name, version, dependencies, etc)
+
+  3- AUTHSAE
+    
+    DEV$ sudo aptitude install openssl
+    DEV$ git clone git://github.com/cozybit/authsae.git
+    DEV$ make -C linux
+    DEV$ cd ..
+    DEV$ tar -czf authsae.tar.gz authsae/
+
+To install authsae copy it somewhere into the target machine and uncompress it.
+
+
+After creating all the deb packages, copy them somewhere in the target ($HOME)
+and then install them by using the next command:
+
+   TARGET$ sudo dpkg --install package_name.deb
+   
+
+
+CONFIGURATION DETAILS FOR ATH9K_HTC WIFI CARDS
+##############################################
+
+This card require a couple of special details:
+
+  1-Install the right firmware
+
+    For the HTC USB cards, it's needed to download the right firmware and copy
+    it to /lib/firmware in the TARGET:
+
+       DEV$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/dwmw2/linux-firmware.git
+       DEV$ cp linux-firmware/htc_7010.fw $TARGET_HD/lib/firmware/
+
+  2-Deactivate hardware encryption:
+
+    The stack uses soft encryption. In order to make it work, hardware
+    encryption has to be disabled. To do tat, the ath9k_htc module has to be
+    loaded with the next parameter: nohwcrypt=1
+
+    We want this to happen when the system automatically loads the module (at
+    boot time, etc). For that, we will have to execute the next comand on the
+    target:
+
+      TARGET$ sudo echo "options ath9k_htc nohwcrypt=1" >> /etc/modprobe.d/local
+
+
+
+CONFIGURATION DETAILS FOR ATH9K WIFI CARDS
+##########################################
+
+  1-Deactivate hardware encryption:
+
+      TARGET$ sudo echo "options ath9k nohwcrypt=1" >> /etc/modprobe.d/local
+
+
+
+TESTING
+#######
+
+In order to have acces to the debug info/logs generated by the kernel, we will
+have to mount debugfs:
+
+  TARGET$ sudo mount -t debugfs none /sys/kernel/debug/
