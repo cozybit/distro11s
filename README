@@ -4,7 +4,7 @@ INTRODUCTION
 This document explains all the steps needed to create distro11s for the
 different supported Targets (qemu, jr, zotac).
 
-For this, we will use a USB memory stick (512mb) and a regular debian image.
+For this, we will use a USB memory stick (512mb) and a regular Debian image.
 
 
 
@@ -17,19 +17,19 @@ For this we are going to use the CD1:
 
 http://cdimage.debian.org/debian-cd/6.0.2.1/amd64/iso-cd/debian-6.0.2.1-amd64-CD-1.iso
 
-We only need the first CD of the series. It cointains all the packages needed
+We only need the first CD of the series. It contains all the packages needed
 to install the system. Afterwards, we will use apt-get/aptitude to install
 extra packages.
 
 1- PREPARE THE USB STICK:
 
-Insert the USB key in any linux ready machine and unmount it (in case it is mounted
+Insert the USB key in any Linux ready machine and unmount it (in case it is mounted
 automatically). Then:
 
   $ sudo fdisk -l
 
-From the ouput, see what is the correct device name of the USB KEY. In this case
-it will be /dev/sdd. Next: 
+From the output, see what is the correct device name of the USB KEY. In this case
+it will be /dev/sdd. Next:
 
   $ cat debian-6.0.2.1-amd64-CD-1.iso > /dev/sdd (1*)
   $ sync
@@ -41,7 +41,7 @@ it will be /dev/sdd. Next:
 Now connect the USB stick to the target system and boot from USB.
 For ZOTAC boards, press F11 at boot time to load a BBS
 Select the memory USB memory stick
-Install debian
+Install Debian
 Reboot
 
 Source: http://www.debian.org/releases/stable/amd64/ch04s03.html.en
@@ -73,7 +73,7 @@ CONFIGURE SSHFS
 ###############
 
 We will mount the target's hard drive through sshfs in order to install on it
-the modules/kernel everytime we re/build them.
+the modules/kernel every time we re/build them.
 
 Install your public key in the target machine:
 
@@ -105,7 +105,7 @@ WORKING WITH THE KERNEL
 #######################
 
 The kernel's code will live on the dev machine. We will do all the work in the
-kernel from the dev station (develeopment/building/etc). Finally, we will
+kernel from the dev station (development/building/etc). Finally, we will
 install the built kernel/modules in the target system.
 
   DEV$ mkdir testbed DEV$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing
@@ -119,19 +119,19 @@ don't want or need to change anything.
     I applied this patch in order to test the mesh stack using one single zotac
 node and different wifi cards
 
-    DEV$ wget http://o11s.org/files/0001-send-to-self-3.0.0-rc2.patch 
-    DEV$ git apply --check 0001-send-to-self-3.0.0-rc2.patch 
-    (to make sure that the patch applies correctly) 
+    DEV$ wget http://o11s.org/files/0001-send-to-self-3.0.0-rc2.patch
+    DEV$ git apply --check 0001-send-to-self-3.0.0-rc2.patch
+    (to make sure that the patch applies correctly)
     DEV$ git am 0001-send-to-self-3.0.0-rc2.patch (ignore warnings)
 
   - Patch2 --> 0001-ath9k_htc-Add-support-for-NL80211_IFTYPE_MESH_POINT-.patch
 
     This patch adds mesh support to the ath9k_htc chipsets
-     
+
    .
    .
    .
-  
+
   - PatchN
 
 Next, create a .config file needed to build the kernel:
@@ -161,12 +161,12 @@ to support different hardware/services needed (like mesh, etc).
   We need to activate support for the next hardware/services:
 
    - Mesh (802.11s)
+   - ath9k and ath9k_htc chipsets
    - Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI
      Express Gigabit Ethernet controller
-   - Ath9k and ath9k_htc chipsets
-  
+
   A customized .config file for ZOTAC boards is available in:
-  
+
     $DISTRO11S/board/zotac/zotac_kenel.config
 
   ----------------------------------------
@@ -178,10 +178,12 @@ Once we have our config file ready customized, then build the kernel:
 Next, install the kernel and the modules to your sshfs
 
   DEV$ cp arch/x86/boot/bzImage $TARGET_HD/boot/vmlinuz-<version>-<architecture>
+  DEV$ cp System.map $TARGET_HD/boot/System.map-<version>-<architecture>3.0.0-rc6-amd64
   DEV$ INSTALL_MOD_PATH=$TARGET_HD make modules_install
 
-  ie: 
+  ie:
   DEV$ cp arch/x86/boot/bzImage $TARGET_HD/boot/vmlinuz-3.0.0-rc6-amd64
+  DEV$ cp System.map $TARGET_HD/boot/System.map-3.0.0-rc6-amd64
 
 Finally add an entry in grub for this new kernel:
 
@@ -219,14 +221,14 @@ deploy a mesh network. Some of these packages are: libnl, iw, authsae, etc The
 goal of this step is build those packages and then create a deb package. This
 will make the installation process of this tools much easier.
 
-  1- LIBNL 
+  1- LIBNL
 
-  WARNINGS!!!!!! 
+  WARNINGS!!!!!!
   ##############
    - I don't know why we need libnl v3
    - Apparently when installing the deb I created, it has some conflicts with
      libnl1-dev & libnl2-dev. The installation of this deb will fail if any of these
-     packages is installed, and viceversa.
+     packages is installed, and vice versa.
    - The weird thing is that if I install this last version of libnl with
      "make install", then everything works!
 
@@ -236,14 +238,14 @@ will make the installation process of this tools much easier.
     DEV$ ./configure --prefix=/usr (2*)
     DEV$ make -j4
 
-    Then create the deb package: 
+    Then create the deb package:
 
     DEV$ sudo aptitude install checkinstall
     DEV$ sudo checkinstall -D --fstrans=no
-    (introduce the right email, pckg name, version, dependencies, etc)
-   
-    Notes: 
- 
+    (introduce the right email, pkcg name, version, dependencies, etc)
+
+    Notes:
+
     1* I had to install the next packages in order to run ./autogen.sh:
          DEV$ aptitude install automake
          (DEV$ aptitutde install dh-autoreconf)
@@ -252,7 +254,7 @@ will make the installation process of this tools much easier.
          DEV$ aptitude install python-dev swig
 
 
-  2- IW  
+  2- IW
 
     DEV$ git clone http://git.sipsolutions.net/iw.git
     DEV$ cd iw
@@ -262,10 +264,10 @@ will make the installation process of this tools much easier.
     Once it is built, create the package:
 
     DEV$ sudo checkinstall -D
-    (introduce the right email, pckg name, version, dependencies, etc)
+    (introduce the right email, pkcg name, version, dependencies, etc)
 
   3- AUTHSAE
-    
+
     DEV$ sudo aptitude install openssl
     DEV$ git clone git://github.com/cozybit/authsae.git
     DEV$ make -C linux
@@ -279,7 +281,7 @@ After creating all the deb packages, copy them somewhere in the target ($HOME)
 and then install them by using the next command:
 
    TARGET$ sudo dpkg --install package_name.deb
-   
+
 
 
 CONFIGURATION DETAILS FOR ATH9K_HTC WIFI CARDS
@@ -302,7 +304,7 @@ This card require a couple of special details:
     loaded with the next parameter: nohwcrypt=1
 
     We want this to happen when the system automatically loads the module (at
-    boot time, etc). For that, we will have to execute the next comand on the
+    boot time, etc). For that, we will have to execute the next command on the
     target:
 
       TARGET$ sudo echo "options ath9k_htc nohwcrypt=1" >> /etc/modprobe.d/local
@@ -318,10 +320,29 @@ CONFIGURATION DETAILS FOR ATH9K WIFI CARDS
 
 
 
+LAST CONFIGURATION DETAILS FOR ZOTAC BOARDS
+###########################################
+
+ - Ethernet controller needs a firmware patch:
+   ------------------------------------------
+
+   Ethernet model: Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI
+   Express Gigabit Ethernet controller
+
+   This ethernet card controller needs a firmware patch. It can work without
+   it, but installing it is strongly recommended. Download it from kernel.org
+   and copy it to /lib/firmware in the target fs:
+
+    DEV$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/dwmw2/linux-firmware.git
+    DEV$ mkdir $TARGET_HD/lib/firmware/rtl_nic
+    DEV$ cp linux-firmware/rtl_nic/rtl8168d-1.fw $TARGET_HD/lib/firmware/rtl_nic/rtl8168d-1.fw
+
+
+
 TESTING
 #######
 
-In order to have acces to the debug info/logs generated by the kernel, we will
+In order to have access to the debug info/logs generated by the kernel, we will
 have to mount debugfs:
 
   TARGET$ sudo mount -t debugfs none /sys/kernel/debug/
