@@ -1,0 +1,6 @@
+Introduction
+============
+
+qemu + hwsim is a super handy mesh development environment.  Before proceeding,
+you should read http://open80211s.org/trac/wiki/QemuAsDevelTarget.  That's
+where all of the distro11s qemu support is derived from.
