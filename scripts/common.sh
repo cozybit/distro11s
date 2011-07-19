@@ -85,6 +85,13 @@ if [ "${DISTRO11S_BOARD}" = "" ]; then
 fi
 
 # set up some internal variables and directories
+BOARDCONF=${TOP}/board/${DISTRO11S_BOARD}/${DISTRO11S_BOARD}.conf
+if [ ! -e ${BOARDCONF} ]; then
+	echo "Board ${DISTRO11S_BOARD} has no configuration (${BOARDCONF})"
+	exit 1
+fi
+source ${BOARDCONF}
+
 PKGLIST=${TOP}/board/${DISTRO11S_BOARD}/pkglist
 if [ ! -e ${PKGLIST} ]; then
 	echo "Board ${DISTRO11S_BOARD} has no package list (${PKGLIST})"

@@ -42,7 +42,15 @@ To build all of the packages, say:
 $ ./scripts/build.sh
 
 Note that most targets use debbootstrap to prepare the basic rootfs and must be
-built as root.  Careful!
+built as root.  You will be warned if/when this happens.
+
+ADDING A NEW SUPPORTED BOARD
+############################
+
+Create a directory in board/ with the name of your board.  Consider cloning the
+board directory for a similar target.  Note the board/<board>/<board>.conf
+file.  It contains board-specific overrides that can be used to tweak the
+build.
 
 TIPS AND TRICKS
 ###############
@@ -52,3 +60,8 @@ TIPS AND TRICKS
    without repeating very time-consuming steps that might be unnecessary.  To
    force various parts of the build to execute again, delete the appropriate
    stamp file.  Inspect the contents in the stamps directory for more details.
+
+-- The stamp system is not very sophisticated at this time.  It's mostly used
+   for the release procedure, which is a complete clean build.  As you develop,
+   you may find it easier to hop around the DISTRO11S_SRC directory manually
+   invoking make/make install (or whatever).
