@@ -15,9 +15,11 @@ SETTING UP YOUR DEVELOPMENT SYSTEM
 
 We build distro11s on Ubuntu 11.04.  Here's how:
 
-1. Intall the packages that you'll need to build the distro:
+1. Intall the packages that you'll need to build the distro.  Note that this
+   list of packages is what's required to build all packages for any
+   conceivable board.
 
-   [ more to come ]
+   apt-get install python-dev
 
 2. Create a configuration file for your build.  This is just a bunch of bash
    variables that influence the build.  The recommended way to create a config
@@ -41,3 +43,12 @@ $ ./scripts/build.sh
 
 Note that most targets use debbootstrap to prepare the basic rootfs and must be
 built as root.  Careful!
+
+TIPS AND TRICKS
+###############
+
+-- Many parts of the distro11s build system use stamp files in the
+   out/<board>/stamps/ directory.  This way, scripts can be run multiple times
+   without repeating very time-consuming steps that might be unnecessary.  To
+   force various parts of the build to execute again, delete the appropriate
+   stamp file.  Inspect the contents in the stamps directory for more details.

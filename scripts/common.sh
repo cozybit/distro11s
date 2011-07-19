@@ -1,6 +1,6 @@
 # Run a command quietly
 function Q {
-	$* > /dev/null 2>&1
+	$* > /dev/null
 }
 
 # set the TOP variable to the top of the distro11s source tree.  Assume that $0
@@ -51,7 +51,17 @@ function parse_pkg {
 	export VCS=`echo ${*} | cut -d ';' -f 2`
 	export URL=`echo ${*} | cut -d ';' -f 3`
 	export BRANCH=`echo ${*} | cut -d ';' -f 4`
-	export SRCDIR=${SRC}/${NAME}
+	export SRCDIR=${DISTRO11S_SRC}/${NAME}
+}
+
+# do a command if the specified stamp file $1 does not exist.
+function do_stamp_cmd {
+	STAMPFILE=${STAMPS}/${1}
+	shift 1
+	if [ ! -e ${STAMPFILE} ]; then
+		$* || exit 1
+		touch ${STAMPFILE}
+	fi
 }
 
 # Now perform all of the common setup steps and variables used by just about

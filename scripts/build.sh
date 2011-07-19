@@ -45,6 +45,10 @@ while read l; do
 		echo "Build script for package ${NAME} does not exist: ${S}."
 		exit 1
 	fi
-	$S || exit 1
+
+	# Set some common variables
+	export CFLAGS="-I${STAGING}/usr/include -I${STAGING}/usr/local/include"
+	export LDFLAGS="-L${STAGING}/lib -L${STAGING}/usr/lib -L${STAGING}/usr/local/lib"
+	$S || exit $?
 done < ${PKGLIST}
 echo "distro11s build complete."
