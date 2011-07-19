@@ -13,6 +13,7 @@ if [ ! -e  ${STAMPS}/qemu.bootstrapped ]; then
 	rm -rf ${STAMPS}/*
 	sudo debootstrap sid ${STAGING} http://ftp.debian.org/debian || exit 1
 	sudo chmod -R a+w ${STAGING}/
+	sudo chmod a+r ${STAGING}/etc/shadow
 	touch ${STAMPS}/qemu.bootstrapped
 fi
 

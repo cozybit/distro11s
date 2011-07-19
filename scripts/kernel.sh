@@ -2,7 +2,6 @@
 
 source `dirname $0`/common.sh
 
-echo "Building kernel"
 Q pushd ${DISTRO11S_SRC}/kernel || exit 1
 
 CONFIG=${TOP}/board/${DISTRO11S_BOARD}/${DISTRO11S_BOARD}_kernel.config

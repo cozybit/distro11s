@@ -32,6 +32,12 @@ done
 # Fetch each of the packages in the package list
 while read l; do
 	parse_pkg $l
+	if [ "${VCS}" = "" ]; then
+		# If a VCS was not specified, we just move along.  This allows us to
+		# have pseudo packages that have an install script but no src code.
+		continue
+	fi
+
 	if [ -e  ${SRCDIR} ]; then
 		echo "UPDATING: ${SRCDIR}"
 		update ${VCS} ${SRCDIR} ${URL} ${BRANCH} || exit 1
