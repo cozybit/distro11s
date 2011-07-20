@@ -34,8 +34,9 @@ else
 fi
 
 # Go package by package and build
-while read l; do
-	parse_pkg $l
+PACKAGES=`cat ${PKGLIST}`
+for p in ${PACKAGES}; do
+	parse_pkg $p
 	if [ "${URL}" != "" -a ! -e  ${SRCDIR} ]; then
 		echo "Expected package ${NAME} in ${SRCDIR}.  Consider running fetch.sh"
 		exit 1
@@ -51,5 +52,5 @@ while read l; do
 	export LDFLAGS="-L${STAGING}/lib -L${STAGING}/usr/lib -L${STAGING}/usr/local/lib"
 	echo "Building ${NAME}"
 	$S || exit $?
-done < ${PKGLIST}
+done
 echo "distro11s build complete."

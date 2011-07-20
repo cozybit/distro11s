@@ -1,11 +1,7 @@
 source `dirname $0`/../../scripts/common.sh
 
-if [ ${USER} != root ]; then
-	echo "WARNING: This script runs debootstrap as root.  Press ENTER to continue."
-	read n
-fi
-
 if [ ! -e  ${STAMPS}/qemu.bootstrapped ]; then
+	root_check "This script runs debootstrap"
 	echo "Populating base rootfs with debian"
 	rm -rf ${STAGING}/*
 	# Here we blow away any other stamps.  The reason is that if we blow away
@@ -13,7 +9,9 @@ if [ ! -e  ${STAMPS}/qemu.bootstrapped ]; then
 	rm -rf ${STAMPS}/*
 	sudo debootstrap sid ${STAGING} http://ftp.debian.org/debian || exit 1
 	sudo chmod -R a+w ${STAGING}/
-	sudo chmod a+r ${STAGING}/etc/shadow
+	sudo chmod -R a+r ${STAGING}/
+	sudo chmod a+x ${STAGING}/root
+	sudo chmod a+x ${STAGING}/ldconfig
 	touch ${STAMPS}/qemu.bootstrapped
 fi
 

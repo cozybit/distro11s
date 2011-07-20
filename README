@@ -68,3 +68,6 @@ TIPS AND TRICKS
    for the release procedure, which is a complete clean build.  As you develop,
    you may find it easier to hop around the DISTRO11S_SRC directory manually
    invoking make/make install (or whatever).
+
+-- Avoid using sudo.  But if you must (e.g., mount, debootstrap, etc.), use the
+   root_check function before invoking sudo.  This alerts the user.

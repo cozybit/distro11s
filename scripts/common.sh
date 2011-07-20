@@ -64,6 +64,26 @@ function do_stamp_cmd {
 	fi
 }
 
+function root_check {
+	if [ ${USER} != root ]; then
+		echo ${*}
+		while true; do
+			read -p "Use sudo? [Yn]" yn
+			case ${yn} in
+				[Yy]* )
+					break;;
+				"" )
+					break;;
+				[Nn]* )
+					exit 1;;
+				* )
+					echo "Please answer yes or no."
+					;;
+			esac
+		done
+	fi
+}
+
 # Now perform all of the common setup steps and variables used by just about
 # every script
 set_top || exit 1
