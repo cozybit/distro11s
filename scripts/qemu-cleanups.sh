@@ -18,8 +18,7 @@ EOF
 chmod +x ${STAGING}/bin/autologin.sh
 
 # disable root password
-sed root::14483:0:99999:7:::
-sed 's/^root:\*:\(.*\)$/root::\1/' < out/qemu/staging/etc/shadow > out/qemu/staging/etc/shadow.new
-mv out/qemu/staging/etc/shadow.new out/qemu/staging/etc/shadow
+sed 's/^root:\*:\(.*\)$/root::\1/' < ${STAGING}/etc/shadow >  ${STAGING}/etc/shadow.new
+mv  ${STAGING}/etc/shadow.new ${STAGING}/etc/shadow
 
 touch ${STAMPS}/qemu-cleanups

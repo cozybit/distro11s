@@ -59,7 +59,7 @@ function do_stamp_cmd {
 	STAMPFILE=${STAMPS}/${1}
 	shift 1
 	if [ ! -e ${STAMPFILE} ]; then
-		$* || exit 1
+		eval "$*" || exit 1
 		touch ${STAMPFILE}
 	fi
 }

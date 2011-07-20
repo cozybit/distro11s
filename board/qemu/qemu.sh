@@ -18,7 +18,7 @@ sudo /usr/sbin/brctl addif br0 ${switch} || die 1
 
 KERNEL=${DISTRO11S_OUT}/qemu/bzImage
 ROOTFS=${DISTRO11S_OUT}/qemu/rootfs.ext3
-qemu-system-x86_64 -kernel ${KERNEL} -hda ${ROOTFS} \
+qemu-system-`uname -i` -kernel ${KERNEL} -hda ${ROOTFS} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
 	-nographic -net nic,model=e1000 -net tap,ifname=${IFNAME},script=no
 
