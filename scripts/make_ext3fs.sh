@@ -6,7 +6,7 @@ fi
 
 root_check "This script mounts drives and makes file systems."
 IMAGE=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/rootfs.ext3
-SIZE=`du -s -B 1k ./out/qemu/staging/ | awk '{print $1}'`
+SIZE=`du -s -B 1k ${STAGING} | awk '{print $1}'`
 SIZE=$((${SIZE}*120/100))
 echo "Creating ${SIZE}kB ext3 file system image"
 dd if=/dev/zero of=${IMAGE} bs=1k count=${SIZE} || exit 1
