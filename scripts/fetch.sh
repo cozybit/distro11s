@@ -30,8 +30,8 @@ while getopts "h" opt; do
 done
 
 # Fetch each of the packages in the package list
-while read l; do
-	parse_pkg $l
+for p in `cat ${PKGLIST}`; do
+	parse_pkg ${p}
 	if [ "${VCS}" = "" ]; then
 		# If a VCS was not specified, we just move along.  This allows us to
 		# have pseudo packages that have an install script but no src code.
@@ -44,6 +44,11 @@ while read l; do
 	else
 		echo "FETCHING: ${NAME}"
 		fetch ${VCS} ${SRCDIR} ${URL} ${BRANCH} || exit 1
+		if [ -d ${TOP}/patches/${NAME} ]; then
+			Q pushd ${SRCDIR}
+			git am ${TOP}/patches/${NAME}/* || exit 1
+			Q popd
+		fi
 	fi
-done < ${PKGLIST}
+done
 echo "all distro11s source packages fetched"

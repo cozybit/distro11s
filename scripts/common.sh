@@ -28,6 +28,8 @@ function fetch {
 		else
 			git clone ${3} -b ${4} ${2}
 		fi
+	elif [ ${1} = "svn" ]; then
+		git svn clone ${3} ${2}
 	else
 		echo "Unsupported version control system ${1}"
 		return 1
@@ -39,6 +41,9 @@ function update {
 	if [ ${1} = "git" ]; then
 		Q pushd ${2}
 		git pull --rebase
+	elif [ ${1} = "svn" ]; then
+		Q pushd ${2}
+		git svn rebase
 	else
 		echo "Unsupported version control system ${1}"
 		return 1
