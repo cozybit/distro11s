@@ -18,7 +18,7 @@ fi
 if [ ! -e ${STAMPS}/qemu.basepkgs ]; then
 	echo "Adding base packages"
 	sudo chroot ${STAGING} apt-get -y --force-yes install vim make gcc sshfs \
-		tcpdump openssh-server || exit 1
+		tcpdump openssh-server rsync || exit 1
 	touch ${STAMPS}/qemu.basepkgs
 	exit
 fi

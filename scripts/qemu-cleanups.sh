@@ -63,4 +63,20 @@ if [ "${DISTRO11S_SSHFS_AUTOMOUNT_PATH}" != "" -a \
 		"/mnt" > ${STAGING}/etc/rc.local
 fi
 
+PUB_KEY=/home/${DISTRO11S_SSHFS_AUTOMOUNT_USER}/.ssh/id_rsa.pub
+AUTH_KEYS=${STAGING}/root/.ssh/authorized_keys
+if [ -e  ${PUB_KEY} ]; then
+	if [ ! -e ${AUTH_KEYS} ]; then
+		touch ${AUTH_KEYS}
+	fi
+	grep "`cat ${PUB_KEY}`" ${AUTH_KEYS} > /dev/null
+	if [ "$?" != "0" ]; then
+		cat ${PUB_KEY} >> ${AUTH_KEYS} || exit 1
+	fi
+fi
+
+sudo chown -R root.root ${STAGING}/root
+sudo chmod 700 ${STAGING}/root
+sudo chmod 700 ${STAGING}/root/.ssh
+
 touch ${STAMPS}/qemu-cleanups
