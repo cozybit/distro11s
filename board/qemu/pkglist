@@ -1,6 +1,7 @@
 kernel;git;git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing;master
 libnl;git;git://git.kernel.org/pub/scm/libs/netlink/libnl.git;master
 iw;git;http://git.sipsolutions.net/iw.git;master
+authsae;git;git@github.com:cozybit/authsae;master
 hwsim_tests;svn;https://cozybit.svn.cvsdude.com/open80211s/trunk/security/tests;
 qemu-cleanups;;;
 overlay;;;
