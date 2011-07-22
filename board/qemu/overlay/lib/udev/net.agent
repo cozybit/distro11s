@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+. /lib/udev/hotplug.functions
+
+exit 1
