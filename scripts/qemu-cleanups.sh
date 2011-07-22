@@ -2,7 +2,7 @@
 
 source `dirname $0`/common.sh
 
-if [ -e ${STAMPS}/qemu-cleanups ]; then
+if [ -e ${STAMPS}/qemu-cleanups -a ! ${FORCE_BUILD} -eq 1 ]; then
 	exit 0;
 fi
 

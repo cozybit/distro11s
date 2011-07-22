@@ -63,7 +63,7 @@ function parse_pkg {
 function do_stamp_cmd {
 	STAMPFILE=${STAMPS}/${1}
 	shift 1
-	if [ ! -e ${STAMPFILE} ]; then
+	if [ ! -e ${STAMPFILE} -o ${FORCE_BUILD} -eq 1 ]; then
 		eval "$*" || exit 1
 		touch ${STAMPFILE}
 	fi
@@ -142,3 +142,12 @@ STAGING=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/staging
 mkdir -p ${STAGING}
 STAMPS=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/stamps
 mkdir -p ${STAMPS}
+
+# Set some common variables
+export PKG_CONFIG_PATH=${STAGING}/usr/share/pkgconfig:${STAGING}/usr/local/lib/pkgconfig
+export CFLAGS="-I${STAGING}/usr/include -I${STAGING}/usr/local/include -I${DISTRO11S_SRC}/src/kernel/include"
+export LDFLAGS="-L${STAGING}/lib -L${STAGING}/usr/lib -L${STAGING}/usr/local/lib"
+
+if [ "${FORCE_BUILD}" = "" ]; then
+	FORCE_BUILD=0
+fi

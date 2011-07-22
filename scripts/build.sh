@@ -47,10 +47,6 @@ for p in ${PACKAGES}; do
 		exit 1
 	fi
 
-	# Set some common variables
-	export PKG_CONFIG_PATH=${STAGING}/usr/share/pkgconfig:${STAGING}/usr/local/lib/pkgconfig
-	export CFLAGS="-I${STAGING}/usr/include -I${STAGING}/usr/local/include -I${DISTRO11S_SRC}/src/kernel/include"
-	export LDFLAGS="-L${STAGING}/lib -L${STAGING}/usr/lib -L${STAGING}/usr/local/lib"
 	echo "Building ${NAME}"
 	$S || exit $?
 done
