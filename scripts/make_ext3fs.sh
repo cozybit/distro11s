@@ -4,6 +4,12 @@ if [ -e ${STAMPS}/make_ext3fs ]; then
 	exit 0;
 fi
 
+function die {
+	sudo losetup -d ${LOOPDEV}
+	sudo umount /mnt
+	exit $1
+}
+
 root_check "This script mounts drives and makes file systems."
 IMAGE=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/rootfs.ext3
 SIZE=`du -s -B 1k ${STAGING} | awk '{print $1}'`
@@ -27,9 +33,9 @@ if [ ${SUCCESS} -eq 0 ]; then
 	echo "Failed to set up loop device"
 	exit 1
 fi
-sudo mkfs -t ext3 -m 1 -v ${LOOPDEV} || exit 1
-sudo mount -o loop ${IMAGE} /mnt || exit 1 
+sudo mkfs -t ext3 -m 1 -v ${LOOPDEV} || die 1
+sudo mount -o loop ${IMAGE} /mnt || die 1
 echo "Copying rootfs from ${STAGING}.  This may take a while...."
-sudo cp -ra ${STAGING}/* /mnt || exit 1
-sudo umount /mnt || exit 1
+sudo cp -ra ${STAGING}/* /mnt || die 1
 touch ${STAMPS}/make_ext3fs
+die 0
