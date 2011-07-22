@@ -12,7 +12,7 @@ function die {
 }
 
 switch=$(/sbin/ip route list | awk '/^default / { print $5 }')
-sudo /sbin/ifconfig ${IFNAME} 192.168.55.1 up || die 1
+sudo /sbin/ifconfig ${IFNAME} ${DISTRO11S_HOST_IP} up || die 1
 sudo /usr/sbin/brctl addbr br0 || die 1
 sudo /usr/sbin/brctl addif br0 ${switch} || die 1
 

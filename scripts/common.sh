@@ -64,23 +64,32 @@ function do_stamp_cmd {
 	fi
 }
 
+function warn_user {
+	if [ "${MSG}" = "" ]; then
+		MSG="Proceed? [Yn]"
+	fi
+	echo ${*}
+	while true; do
+		read -p "${MSG}" yn
+		case ${yn} in
+			[Yy]* )
+				break;;
+			"" )
+				break;;
+			[Nn]* )
+				exit 1;;
+			* )
+				echo "Please answer yes or no."
+				;;
+		esac
+	done
+}
+
 function root_check {
 	if [ ${USER} != root ]; then
-		echo ${*}
-		while true; do
-			read -p "Use sudo? [Yn]" yn
-			case ${yn} in
-				[Yy]* )
-					break;;
-				"" )
-					break;;
-				[Nn]* )
-					exit 1;;
-				* )
-					echo "Please answer yes or no."
-					;;
-			esac
-		done
+		MSG="Use sudo? [Yn]"
+		warn_user ${*}
+		MSG=""
 	fi
 }
 

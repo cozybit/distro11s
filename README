@@ -10,6 +10,25 @@ latest and greatest.  This document explains all the steps needed to build
 distro11s.  For details on the supported target boards, see the README files in
 the board/ directory.
 
+SAFETY AND SECURITY
+###################
+
+It should be noted that little effort has been made to make distro11s safe and
+secure.  Building it does require super user access for all kinds of unsavory
+tasks such as formatting file systems, blowing away the file system staging
+directory, etc.  When distro11s wants to do something as the super user, it
+generally warns you and requires your OK.  But it is entirely possible that a
+poorly or hastily written distro11s config file could result in blowing away
+your entire root file system.  Seriously.
+
+It should also be noted that some features (such as the SSHFS automount) are
+handy for developers, but have inherent security flaws.  That feature in
+particular adds a key with no password to your authorized_keys file
+automatically!  If you were to enable this feature and distribute the distro11s
+file system, anybody with that file system and a link to your laptop could log
+in to your development machine!  Seriously!  You will be warned at build time
+about this sort of stuff.  But seriously!  Be careful.
+
 SETTING UP YOUR DEVELOPMENT SYSTEM
 ##################################
 
@@ -73,3 +92,7 @@ TIPS AND TRICKS
 
 -- Avoid using sudo.  But if you must (e.g., mount, debootstrap, etc.), use the
    root_check function before invoking sudo.  This alerts the user.
+
+-- If you're adding a new build script, try to make it repeatable.  That is, if
+   I blow away all of the stamp files and invoke your build script, it should
+   do the right thing.
