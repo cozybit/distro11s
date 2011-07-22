@@ -99,6 +99,11 @@ if [ "${DISTRO11S_SRC}" = "" ]; then
 	exit 1;
 fi
 
+if [ "${DISTRO11S_OUT}" = "" ]; then
+	echo "No DISTRO11S_OUT directory specified"
+	exit 1;
+fi
+
 if [ "${DISTRO11S_BOARD}" = "" ]; then
 	echo "No DISTRO11S_BOARD specified"
 	exit 1;
