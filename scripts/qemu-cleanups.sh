@@ -57,6 +57,7 @@ if [ "${DISTRO11S_SSHFS_AUTOMOUNT_PATH}" != "" -a \
 		mkdir -p ${STAGING}/root/.ssh/
 		yes | ssh-keygen -t rsa -N "" -f ${STAGING}/root/.ssh/id_rsa || exit 1
 		cat ${PUB_KEY} >> ${AUTH_KEYS} || exit 1
+		cat ${PUB_KEY} >> ${STAGING}/root/.ssh/authorized_keys || exit 1
 	fi
 	echo "sshfs -o allow_other,idmap=user,UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no " \
 		"${DISTRO11S_SSHFS_AUTOMOUNT_USER}@${DISTRO11S_HOST_IP}:${DISTRO11S_SSHFS_AUTOMOUNT_PATH} " \
