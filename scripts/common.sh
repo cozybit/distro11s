@@ -23,10 +23,14 @@ function set_top {
 # fetch ${VCS} ${DEST} ${URL} ${BRANCH}
 function fetch {
 	if [ ${1} = "git" ]; then
+		GIT="git clone"
+		if [ "${DISTRO11S_GIT_REFERENCE}" != "" ]; then
+			GIT=$GIT --reference ${DISTRO11S_GIT_REFERENCE}
+		fi
 		if [ "${4}" = "" ]; then
-			git clone ${3} ${2}
+			${GIT} ${3} ${2}
 		else
-			git clone ${3} -b ${4} ${2}
+			${GIT} ${3} -b ${4} ${2}
 		fi
 	elif [ ${1} = "svn" ]; then
 		git svn clone ${3} ${2}
