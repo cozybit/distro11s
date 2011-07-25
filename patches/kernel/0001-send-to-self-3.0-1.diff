@@ -1,0 +1,108 @@
+diff -urp v3.0/linux/Documentation/networking/ip-sysctl.txt linux/Documentation/networking/ip-sysctl.txt
+--- v3.0/linux/Documentation/networking/ip-sysctl.txt	2011-07-22 09:43:18.000000000 +0300
++++ linux/Documentation/networking/ip-sysctl.txt	2011-07-22 11:35:22.261083426 +0300
+@@ -765,6 +765,13 @@ accept_redirects - BOOLEAN
+ forwarding - BOOLEAN
+ 	Enable IP forwarding on this interface.
+ 
++loop - BOOLEAN
++	By default (loop=0) the traffic between local IP addresses
++	is routed via interface "lo". Setting this flag for two
++	interfaces allows traffic between their IP addresses to
++	be looped externally. This is useful for setups where the
++	interfaces are attached to same broadcast medium.
++
+ mc_forwarding - BOOLEAN
+ 	Do multicast routing. The kernel needs to be compiled with CONFIG_MROUTE
+ 	and a multicast routing daemon is required.
+diff -urp v3.0/linux/include/linux/inetdevice.h linux/include/linux/inetdevice.h
+--- v3.0/linux/include/linux/inetdevice.h	2011-05-20 10:38:00.000000000 +0300
++++ linux/include/linux/inetdevice.h	2011-07-22 11:35:22.262081940 +0300
+@@ -30,6 +30,7 @@ enum
+ 	IPV4_DEVCONF_NOXFRM,
+ 	IPV4_DEVCONF_NOPOLICY,
+ 	IPV4_DEVCONF_FORCE_IGMP_VERSION,
++	IPV4_DEVCONF_LOOP,
+ 	IPV4_DEVCONF_ARP_ANNOUNCE,
+ 	IPV4_DEVCONF_ARP_IGNORE,
+ 	IPV4_DEVCONF_PROMOTE_SECONDARIES,
+@@ -139,6 +140,7 @@ static inline void ipv4_devconf_setall(s
+ 	  IN_DEV_ORCONF((in_dev), ACCEPT_REDIRECTS)))
+ 
+ #define IN_DEV_ARPFILTER(in_dev)	IN_DEV_ORCONF((in_dev), ARPFILTER)
++#define IN_DEV_LOOP(in_dev)		IN_DEV_CONF_GET(in_dev, LOOP)
+ #define IN_DEV_ARP_ANNOUNCE(in_dev)	IN_DEV_MAXCONF((in_dev), ARP_ANNOUNCE)
+ #define IN_DEV_ARP_IGNORE(in_dev)	IN_DEV_MAXCONF((in_dev), ARP_IGNORE)
+ #define IN_DEV_ARP_NOTIFY(in_dev)	IN_DEV_MAXCONF((in_dev), ARP_NOTIFY)
+diff -urp v3.0/linux/net/ipv4/devinet.c linux/net/ipv4/devinet.c
+--- v3.0/linux/net/ipv4/devinet.c	2011-07-22 09:43:32.000000000 +0300
++++ linux/net/ipv4/devinet.c	2011-07-22 11:35:22.263083057 +0300
+@@ -1604,6 +1604,7 @@ static struct devinet_sysctl_table {
+ 		DEVINET_SYSCTL_RW_ENTRY(LOG_MARTIANS, "log_martians"),
+ 		DEVINET_SYSCTL_RW_ENTRY(TAG, "tag"),
+ 		DEVINET_SYSCTL_RW_ENTRY(ARPFILTER, "arp_filter"),
++		DEVINET_SYSCTL_RW_ENTRY(LOOP, "loop"),
+ 		DEVINET_SYSCTL_RW_ENTRY(ARP_ANNOUNCE, "arp_announce"),
+ 		DEVINET_SYSCTL_RW_ENTRY(ARP_IGNORE, "arp_ignore"),
+ 		DEVINET_SYSCTL_RW_ENTRY(ARP_ACCEPT, "arp_accept"),
+diff -urp v3.0/linux/net/ipv4/fib_frontend.c linux/net/ipv4/fib_frontend.c
+--- v3.0/linux/net/ipv4/fib_frontend.c	2011-07-22 09:43:32.000000000 +0300
++++ linux/net/ipv4/fib_frontend.c	2011-07-22 11:35:42.597083191 +0300
+@@ -198,6 +198,7 @@ int fib_validate_source(struct sk_buff *
+ 	struct fib_result res;
+ 	int no_addr, rpf, accept_local;
+ 	bool dev_match;
++	int loop = 0;
+ 	int ret;
+ 	struct net *net;
+ 
+@@ -218,6 +219,7 @@ int fib_validate_source(struct sk_buff *
+ 
+ 		accept_local = IN_DEV_ACCEPT_LOCAL(in_dev);
+ 		fl4.flowi4_mark = IN_DEV_SRC_VMARK(in_dev) ? skb->mark : 0;
++		loop = IN_DEV_LOOP(in_dev);
+ 	}
+ 
+ 	if (in_dev == NULL)
+@@ -226,6 +228,10 @@ int fib_validate_source(struct sk_buff *
+ 	net = dev_net(dev);
+ 	if (fib_lookup(net, &fl4, &res))
+ 		goto last_resort;
++	if (loop && res.type == RTN_LOCAL) {
++		*spec_dst = FIB_RES_PREFSRC(net, res);
++		return 0;
++	}
+ 	if (res.type != RTN_UNICAST) {
+ 		if (res.type != RTN_LOCAL || !accept_local)
+ 			goto e_inval;
+diff -urp v3.0/linux/net/ipv4/route.c linux/net/ipv4/route.c
+--- v3.0/linux/net/ipv4/route.c	2011-07-22 09:43:33.000000000 +0300
++++ linux/net/ipv4/route.c	2011-07-22 11:41:18.920083030 +0300
+@@ -2593,6 +2593,27 @@ static struct rtable *ip_route_output_sl
+ 	}
+ 
+ 	if (res.type == RTN_LOCAL) {
++		struct in_device *in_dev;
++		__be32 src;
++
++		dev_out = FIB_RES_DEV(res);
++		in_dev = __in_dev_get_rcu(dev_out);
++		src = fl4->saddr? : FIB_RES_PREFSRC(net, res);
++		if (in_dev && IN_DEV_LOOP(in_dev) && src) {
++			struct net_device *dev_src;
++
++			dev_src = __ip_dev_find(net, src, false);
++			if (dev_src && dev_src != dev_out &&
++			    (in_dev = __in_dev_get_rcu(dev_src)) &&
++			    IN_DEV_LOOP(in_dev)) {
++				dev_out = dev_src;
++				fl4->saddr = src;
++				fl4->flowi4_oif = dev_out->ifindex;
++				res.type = RTN_UNICAST;
++				res.fi = NULL;
++				goto make_route;
++			}
++		}
+ 		if (!fl4->saddr) {
+ 			if (res.fi->fib_prefsrc)
+ 				fl4->saddr = res.fi->fib_prefsrc;
