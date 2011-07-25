@@ -1,3 +1,14 @@
+Subject: send to self
+Date: Mon, 22 Jul 2011 07:48:09 -0000
+From: Brian Cavagnolo <brian@cozybit.com>
+
+This is the famous send-to-self patch reformatted so that
+it applies with git am.
+
+http://www.ssi.bg/~ja/#loop
+
+---
+
 diff -urp v3.0/linux/Documentation/networking/ip-sysctl.txt linux/Documentation/networking/ip-sysctl.txt
 --- v3.0/linux/Documentation/networking/ip-sysctl.txt	2011-07-22 09:43:18.000000000 +0300
 +++ linux/Documentation/networking/ip-sysctl.txt	2011-07-22 11:35:22.261083426 +0300
