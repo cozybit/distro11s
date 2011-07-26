@@ -23,7 +23,7 @@ chmod +x ${STAGING}/bin/autologin.sh
 
 # disable root password
 sed 's/^root:\*:\(.*\)$/root::\1/' < ${STAGING}/etc/shadow >  ${STAGING}/etc/shadow.new
-mv  ${STAGING}/etc/shadow.new ${STAGING}/etc/shadow
+mv -f ${STAGING}/etc/shadow.new ${STAGING}/etc/shadow
 
 echo "Setting up static ip"
 # set up static IP address if necessary
