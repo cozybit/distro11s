@@ -21,6 +21,11 @@ EOF
 )" > ${STAGING}/bin/autologin.sh
 chmod +x ${STAGING}/bin/autologin.sh
 
+sed 's/^\([1-6]:[1-6]*:respawn:\)\/sbin\/getty \(38400 tty[1-6]\)$/\1\/sbin\/agetty \-n \-l \/bin\/autologin \2/' \
+	< ${STAGING}/etc/inittab > ${STAGING}/etc/inittab.new
+sudo mv -f ${STAGING}/etc/inittab.new ${STAGING}/etc/inittab
+
+
 # disable root password
 sed 's/^root:\*:\(.*\)$/root::\1/' < ${STAGING}/etc/shadow >  ${STAGING}/etc/shadow.new
 mv -f ${STAGING}/etc/shadow.new ${STAGING}/etc/shadow
