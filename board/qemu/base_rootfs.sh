@@ -1,7 +1,7 @@
 source `dirname $0`/../../scripts/common.sh
 
 if [ ! -e  ${STAMPS}/qemu.bootstrapped ]; then
-	root_check "This script runs debootstrap"
+	root_check "This script runs debootstrap in ${STAGING}"
 	echo "Populating base rootfs with debian"
 	rm -rf ${STAGING}/*
 	# Here we blow away any other stamps.  The reason is that if we blow away
