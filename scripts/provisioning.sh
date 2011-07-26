@@ -19,6 +19,10 @@ if [ "$CHECK" != "0" ]; then
 
    echo "Creating partition table"
    sudo dd if=/dev/zero of=${DEV} count=2 bs=512 > /dev/null
+   V=`fdisk -v`
+   if [ "${V}" != "fdisk (util-linux-ng 2.17.2)" ]; then
+       echo "WARNING: unkown version of fdisk.  Proceeding anyway."
+   fi
    echo -e -n n\\np\\n1\\n\\n\\na\\n1\\nw\\n | sudo fdisk ${DEV} > /dev/null
    echo "Formating the partitions"
    sudo mkfs -t ext3 -m 1 -v ${DEV}1
