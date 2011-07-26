@@ -35,4 +35,4 @@ if [ -d /etc/profile.d ]; then
   done
   unset i
 fi
-export LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/lib
