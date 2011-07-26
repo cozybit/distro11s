@@ -20,20 +20,22 @@ function set_top {
 	return 1
 }
 
-# fetch ${VCS} ${DEST} ${URL} ${BRANCH}
+# fetch ${VCS} ${NAME} ${URL} ${BRANCH}
 function fetch {
+	DEST=${DISTRO11S_SRC}/${NAME}
 	if [ ${1} = "git" ]; then
 		GIT="git clone"
 		if [ "${DISTRO11S_GIT_REFERENCE}" != "" ]; then
-			GIT=$GIT --reference ${DISTRO11S_GIT_REFERENCE}
+			GIT="${GIT} --reference ${DISTRO11S_GIT_REFERENCE}/${2}"
 		fi
+		echo "${GIT}"
 		if [ "${4}" = "" ]; then
-			${GIT} ${3} ${2}
+			${GIT} ${3} ${DEST}
 		else
-			${GIT} ${3} -b ${4} ${2}
+			${GIT} ${3} -b ${4} ${DEST}
 		fi
 	elif [ ${1} = "svn" ]; then
-		git svn clone ${3} ${2}
+		git svn clone ${3} ${DEST}
 	else
 		echo "Unsupported version control system ${1}"
 		return 1

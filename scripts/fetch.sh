@@ -43,7 +43,7 @@ for p in `cat ${PKGLIST}`; do
 		update ${VCS} ${SRCDIR} ${URL} ${BRANCH} || exit 1
 	else
 		echo "FETCHING: ${NAME}"
-		fetch ${VCS} ${SRCDIR} ${URL} ${BRANCH} || exit 1
+		fetch ${VCS} ${NAME} ${URL} ${BRANCH} || exit 1
 		if [ -d ${TOP}/patches/${NAME} ]; then
 			Q pushd ${SRCDIR}
 			git am ${TOP}/patches/${NAME}/* || exit 1
