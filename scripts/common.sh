@@ -104,6 +104,19 @@ function root_check {
 	fi
 }
 
+function pkg_version {
+	if [ ${1} = "git" ]; then
+		Q pushd ${2}
+		git log | head -1 | awk '{print $2}'
+	elif [ ${1} = "svn" ]; then
+		Q pushd ${2}
+		git svn log 2> /dev/null | head -2 | tail -1 | awk '{print $1}'
+	else
+		echo "Unsupported version control system ${1}"
+		return 1
+	fi
+}
+
 # Now perform all of the common setup steps and variables used by just about
 # every script
 set_top || exit 1

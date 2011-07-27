@@ -34,6 +34,7 @@ else
 fi
 
 # Go package by package and build
+rm -f ${STAGING}/etc/distro11s-versions
 PACKAGES=`cat ${PKGLIST}`
 for p in ${PACKAGES}; do
 	parse_pkg $p
@@ -49,5 +50,8 @@ for p in ${PACKAGES}; do
 
 	echo "Building ${NAME}"
 	$S || exit $?
+
+	# Add versioning for each package
+	echo ${NAME} ${URL} `pkg_version ${VCS} ${SRCDIR}`>> ${STAGING}/etc/distro11s-versions
 done
 echo "distro11s build complete."
