@@ -23,7 +23,7 @@ DISTRO11S_GIT_REFERENCE=${DISTRO11S_GIT_REFERENCE}
 EOF
 )" > distro11s.conf
 	./scripts/fetch.sh || { echo Failed to fetch source; exit 1; }
-	./scripts/build.sh || { echo Failed to fetch source; exit 1; }
+	./scripts/build.sh || { echo Failed to build source; exit 1; }
 }
 
 CORES=2
