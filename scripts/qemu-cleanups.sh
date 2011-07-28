@@ -81,8 +81,14 @@ if [ -e  ${PUB_KEY} ]; then
 	fi
 fi
 
-sudo chown -R root.root ${STAGING}/root
-sudo chmod 700 ${STAGING}/root
-sudo chmod 700 ${STAGING}/root/.ssh
+# Fix up ssh directory permissions so that key authentication works
+if [ -d ${STAGING}/root ]; then
+	sudo chown -R root.root ${STAGING}/root
+	sudo chmod 700 ${STAGING}/root
+fi
+
+if [ -d ${STAGING}/root/.ssh ]; then
+	sudo chmod 700 ${STAGING}/root/.ssh
+fi
 
 touch ${STAMPS}/qemu-cleanups
