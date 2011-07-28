@@ -7,14 +7,10 @@ IFNAME=`sudo tunctl -u $USER -b`
 
 function die {
 	sudo tunctl -d ${IFNAME}
-	sudo /usr/sbin/brctl delbr br0
 	exit $1
 }
 
-switch=$(/sbin/ip route list | awk '/^default / { print $5 }')
 sudo /sbin/ifconfig ${IFNAME} ${DISTRO11S_HOST_IP} up || die 1
-sudo /usr/sbin/brctl addbr br0 || die 1
-sudo /usr/sbin/brctl addif br0 ${switch} || die 1
 
 KERNEL=${DISTRO11S_OUT}/qemu/bzImage
 ROOTFS=${DISTRO11S_OUT}/qemu/rootfs.ext3
