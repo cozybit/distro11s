@@ -1,0 +1,108 @@
+Introduction
+============
+
+The kernel where we develop open80211s lives here:
+
+git@github.com:cozybit/open80211s.git
+
+This tree is meant to track the wireless-testing tree closely, which is available here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git
+
+We want to make releases from the open80211s tree that contains our development
+patches.  Generally, these patches will have been submitted, but perhaps not
+accepted.  Accordingly, the patches are subject to revision and will have to be
+updated.  This document describes how we set up the open80211s tree to do this,
+and how the development cycle works.
+
+This practice can be applied to other trees as needed.  For example, if we
+start to have a long list of wpa_supplicant patches that are under review but
+not committed upstream yet, consider setting up a forked wpa_supplicant tree
+and applying a similar technique to the one described here.
+
+Setting up the tree
+===================
+
+Development bound for distro11s happens on the distro11s-dev branch.  You, the
+distro11s maintainer, are the only one who messes with this branch.  Start by
+creating it:
+
+   $ cd some/kernel/git/tree/ # possibly ${DISTRO11S_SRC}/kernel
+   $ git remote add wt git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git
+   $ git fetch wt master:wt
+   $ git remote add o11s git@github.com:cozybit/open80211s.git
+   $ git push o11s +wt:distro11s-dev
+   $ git fetch o11s distro11s-dev:distro11s-dev
+
+Now, you must redirect distro11s to build the o11s tree instead of the upstream
+tree.  To do this, alter board/<board>/pkglist.  You probably have to rm -rf
+${DISTRO11S_SRC}/kernel and run distro11s/scripts/fetch.sh to get the new
+kernel in place.  distro11s is not clever enough to just fetch a branch.
+
+Okay.  Now your working copy has a distro11s-dev branch.  You (the distro11s
+maintainer) will periodically rebase this branch to wt HEAD and push -f to
+o11s.  Read on for more details on how this works.
+
+Fetching Patches
+================
+
+You need a way to fetch raw patches submitted by developers.  There are a few
+ways to do this.  I use distro11s/hosttools/getpatch.py to pull them from my
+email account.  Anyway, before you can properly manage distro11s using the
+techniques described here, you should have a favorite way of fetching patches.
+
+The development cycle
+=====================
+
+0. It's Monday.  The top of a development cycle.  You, the distro11s
+   maintainer, are preparing the next release of distro11s.  You start by
+   rebasing the open80211s tree's distro11s-dev branch to wireless testing
+   HEAD:
+
+   $ cd $DITRO11S_SRC/kernel/
+   $ git fetch wt master:wt
+   $ git rebase wt distro11s-dev
+   [ resolve any conflicts ]
+
+1. Bob is a open80211s developer.  Last week he submitted a patchset containing
+   3 patches that support the "next big thing" (nbt) and submits them to
+   linux-wireless mailing list.  He expects these patches to go in the next
+   distro11s release, so he --bcc's distro11s@cozybit.com.  You fetch these
+   patches into your kernel directory.  Let's call the patches 1.patch,
+   2.patch, and 3.patch.
+
+2. Apply Bob's patches:
+
+   $ git am 1.patch 2.patch 3.patch
+
+   You might get some conflicts here depending on what has happend in the
+   wireless testing tree.  If this happens, you can either resolve the
+   conflicts yourself, or ask Bob to rebase his patches to wireless-testing
+   HEAD and resubmit to distro11s@cozybit.com.
+
+3. Repeat steps 1-2 for Alice's patches and the patches from any other
+   developers.
+
+4. Push to o11s:
+
+   $ git push o11s +distro11s-dev:distro11s-dev
+
+   This forces the distro11s-dev remote branch to look just like yours.
+
+5. Okay.  It's Friday.  Spin and test the release.  After you are happy with
+   the release, you must make tag the tree.
+
+   TODO: This should be handled automatically by the release script somehow
+
+6. It's Monday again.  Since the last week, Alice's patches were accepted
+   upstream.  Bob's patches sustained some comments and he submitted some V2
+   patches that have not been accepted yet.  Repeat step 0 above.  This time,
+   Alice's patches should be swallowed up in the mainline by the rebase.  Bob's
+   V1 patches will remain at the tip of the distro11s-dev branch.
+
+7. Fetch Bob's V2 patch set and use your git skills to replace Bob's V1 patches
+   with his V2 patches.  I like git rebase -i to eliminate Bob's V1 patches and
+   just git am to apply his V2 patches.  After this step, push to o11s as in
+   step 4.
+
+8. Repeat steps 1-5 to capture any new developments and spin the next release.
