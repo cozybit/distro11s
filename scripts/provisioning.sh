@@ -1,52 +1,145 @@
 #!/bin/bash
 
-source `dirname $0`/common.sh
+DRIVE=/mnt/distross
+REBOOT=n
+USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-u] [-n <name>] [-v]"
+INSTALLER=n
+USB_MODE=n
+VERBOSE=n
 
-DEV=$1
+while getopts "d:ruhin:v" options; do
+    case $options in
+        d ) DEV=${OPTARG};;
+        r ) REBOOT='y';;
+        u ) USB_MODE='y';;
+        i ) INSTALLER='y';;
+        n ) HOSTNAME=${OPTARG};;
+        v ) VERBOSE='y';;
+        h ) echo "Options:"
+            echo "-d <device>    Set the device to provision"
+            echo "-r             Reboot the local machine after provisioning"
+            echo "-u             Set the USB provisioning mode"
+            echo "-n <name>      Change the hostname of the provisioning system"
+            echo "-i             Set the USB Installer creation mode"
+            echo "-v             set verbose mode"
+            echo "-h             Print help"
+            ;;
+        * ) echo ${USAGE}
+            exit 1;;
+    esac
+done
 
-root_check "This script runs fdisk/mkdosfs/mkfs/etc on ${DEV}"
+[ "${DEV}" == "" ] && { echo "Error: Specify a device to provision distro11s. "; exit 1; }
 
-CHECK=`sudo fdisk -l ${DEV} | wc -l`
+if [ "${VERBOSE}" == "y" ]; then
+    set -x
+fi
 
-if [ "$CHECK" != "0" ]; then
-  
+if [ "${USB_MODE}" == "n" ]; then
 
-   PARTITIONS=`mount | grep ${DEV} | awk '{print $1}'`
+    source `dirname $0`/common.sh
+    root_check "This script runs fdisk/mkdosfs/mkfs/etc on ${DEV}"
+    STAGING=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/staging
+    KERNEL=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/bzImage
+    if [ "${INSTALLER}" == "y" ]; then
+        PROV_SCRIPT_PATH=/root/provisioning.sh
+        HOSTNAME=usbinstaller
+    fi
+else
+    STAGING=/staging
+    KERNEL=/boot/bzImage
+fi
+
+ISVALID=`sudo fdisk -l ${DEV} | wc -l`
+
+if [ "${ISVALID}" != "0" ]; then
+
+   PARTITIONS=`sudo mount | grep ${DEV} | awk '{print $1}'`
    for part in ${PARTITIONS}; do
        sudo umount ${part} > /dev/null
-       [ "$?" != "1" ] || { echo "Error: problem unmouting ${part}. Aborting provisioning"; exit 1; }
+       [ "$?" != "0" ] && { echo "Error: problem unmouting ${part}. Aborting distro11s provisioning"; exit 1; }
    done
 
-   echo "Creating partition table"
+   echo "Creating the partition table in ${DEV}"
    sudo dd if=/dev/zero of=${DEV} count=2 bs=512 > /dev/null
    V=`fdisk -v`
    if [ "${V}" != "fdisk (util-linux-ng 2.17.2)" ]; then
        echo "WARNING: unkown version of fdisk.  Proceeding anyway."
    fi
    echo -e -n n\\np\\n1\\n\\n\\na\\n1\\nw\\n | sudo fdisk ${DEV} > /dev/null
-   echo "Formating the partitions"
-   sudo mkfs -t ext3 -m 1 -v ${DEV}1
-   [ "$?" != "1" ] || { echo "Error: problem formating the EXT partition. Aborting provisioning"; exit 1; }
+   echo "Rereading the partition table of ${DEV}"
+   [ "$?" != "1" ] || { echo "Error: problem reading the partition table of ${DEV}. Aborting distro11s provisioning"; exit 1; }
+   sudo sfdisk -R ${DEV}
+   echo "Creating the EXT3 file system for ${DEV}1"
+   sudo mkfs -t ext3 -m 1 ${DEV}1
+   [ "$?" != "1" ] || { echo "Error: problem formating the partition. Aborting distro11s provisioning"; exit 1; }
    echo "Mounting ${DEV}1"
-   sudo mkdir -p /mnt/distross
-   sudo mount ${DEV}1 /mnt/distross
-   [ "$?" != "1" ] || { echo "Error: problem mounting the partition ${DEV}1. Aborting provisioning"; exit 1; }
-   echo "Copying the file system to ${DEV}1"
-   sudo cp -rav ${DISTRO11S_OUT}/${DISTRO11S_BOARD}/staging/* /mnt/distross > /dev/null
-   [ "$?" != "1" ] || { echo "Error: copying the file system to ${DEV}1. Aborting provisioning"; exit 1; }
-   sudo grub-install --root-directory=/mnt/distross ${DEV}
-   sudo cp ${DISTRO11S_OUT}/${DISTRO11S_BOARD}/bzImage /mnt/distross/boot/
-   echo "$(cat <<EOF
-root (hd0, msdos1)
+   sudo mkdir -p ${DRIVE}
+   sudo mount ${DEV}1 ${DRIVE}
+   [ "$?" != "1" ] || { echo "Error: problem mounting the partition ${DEV}1. Aborting distro11s provisioning"; exit 1; }
+   echo "Provisioning distro11s onto ${DEV}1"
+   sudo cp -ra ${STAGING}/* ${DRIVE}
+   [ "$?" != "1" ] || { echo "Error: provisioning step failed. Aborting distro11s provisioning"; exit 1; }
+   echo "Copying the kernel"
+   sudo cp ${KERNEL} ${DRIVE}/boot/
+   echo "Installing GRUB"
+   sudo grub-install --root-directory=${DRIVE} ${DEV}
+   [ "$?" != "1" ] || { echo "Error: grub installation failed. Aborting distro11s provisioning"; exit 1; }
+
+   if [ "${INSTALLER}" == "n" ]; then
+
+       echo "Creating grub config file"
+       echo "$(cat <<EOF
+set root=(hd0,msdos1)
 linux /boot/bzImage root=/dev/sda1
 boot
 EOF
 )" > /tmp/grub.cfg
-   sudo mv /tmp/grub.cfg /mnt/distross/boot/grub/
+   sudo mv /tmp/grub.cfg ${DRIVE}/boot/grub/
+
+   else
+
+       echo "Creating grub config file"
+       echo "$(cat <<EOF
+set root=(hd0,msdos1)
+linux /boot/bzImage root=/dev/sdb1 rootdelay=10
+boot
+EOF
+)" > /tmp/grub.cfg
+       sudo mv /tmp/grub.cfg ${DRIVE}/boot/grub/
+       echo "Copying the file system to provision"
+       sudo mkdir ${DRIVE}/staging
+       sudo cp -ra ${STAGING}/* ${DRIVE}/staging
+       echo "Adding provisioning script to rc.local"
+       sudo cp ${TOP}/scripts/provisioning.sh ${DRIVE}${PROV_SCRIPT_PATH}
+       sudo chmod +x ${DRIVE}${PROV_SCRIPT_PATH}
+       sudo sed -i -e '$d' ${DRIVE}/etc/rc.local
+       echo -e "${PROV_SCRIPT_PATH} -d /dev/sda -u -n zotact  \nexit 0" >> ${DRIVE}/etc/rc.local
+
+   fi
+
+   if [ "${HOSTNAME}" != "" ]; then
+        echo "Configuring hostname"
+        echo ${HOSTNAME} >> /tmp/hostname
+        sudo mv /tmp/hostname ${DRIVE}/etc/
+        sudo sed -i '$a127.0.0.1     '${HOSTNAME}'' ${DRIVE}/etc/hosts
+   fi
+
+   echo "Unmounting ${DEV}1"
    sudo umount ${DEV}1
-   rm -rf /mtn/distross
-   echo "DISTRO11S PROVISIONING COMPLETE!!"
- 
+   sudo rm -rf ${DRIVE}
+
+   if [ "$INSTALLER" == "n" ]; then
+       echo "distro11s provisioning complete!"
+   else
+       echo "distro11s usb installer created!"
+   fi
+
+   if [ "${REBOOT}" == "y" ]; then
+       echo "Rebooting the system"
+       sudo reboot
+   fi
+
 else
    echo "${DEV} is not a valid device. Please use a connected device"
    exit 1
