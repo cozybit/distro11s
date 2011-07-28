@@ -121,9 +121,17 @@ function pkg_version {
 # every script
 set_top || exit 1
 
+# Allow user to override configuration file in environment
+if [ "${DISTRO11S_CONF}" = "" ]; then
+	DISTRO11S_CONF=${TOP}/distro11s.conf
+fi
+
 # source the config variables
-if [ -e ${TOP}/distro11s.conf ]; then
-	source ${TOP}/distro11s.conf
+if [ -e ${DISTRO11S_CONF} ]; then
+	source ${DISTRO11S_CONF}
+else
+	echo "Specified config file ${DISTRO11S_CONF} does not exist"
+	exit 1
 fi
 
 # validate configuration

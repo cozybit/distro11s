@@ -52,6 +52,13 @@ We build distro11s on Ubuntu 11.04.  Here's how:
    file is to copy distro11s.sample.conf to distro11s.conf and edit it.  It's
    loaded with comments, so read it for more details.
 
+   If you want to support simultaneous builds for different boards, you can
+   have a different config file for each board.  Just set the DISTRO11S_CONF
+   environment variable to the config file that you want to use.  You may wish
+   to set the DISTRO11S_SRC variables in different config files to keep the
+   per-package builds separate.  DISTRO11S_OUT, on the other hand, should
+   co-exist fine for different boards.
+
 FETCHING THE CODE
 #################
 
