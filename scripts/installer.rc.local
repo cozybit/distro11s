@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# This is the rc.local script that the USB installer runs.  It copies the
+# staged file system over to the local harddrive and reboots.  To achieve this,
+# we use the trusty provisioning script.  But for that to work, we have to
+# spoof it into thinking that it is on a development machine as opposed to a
+# deployed machine.
+
+echo "Checking for provisioning configuration"
+if [ -e /etc/distro11s.conf ]; then
+	source /etc/distro11s.conf
+else
+	echo "Failed to find /etc/distro11s.conf"
+	exit 1
+fi
+
+if [ ! -e /etc/hostnumber ]; then
+	echo 0 > /etc/hostnumber
+fi
+
+PROV_HOSTNAME=${DISTRO11S_HOSTNAME}
+if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
+	PROV_HOSTNAME=${PROV_HOSTNAME}-`cat /etc/hostnumber`
+fi
+
+export STAGING=/staging
+export KERNEL=/boot/bzImage
+
+/usr/local/bin/provisioning.sh -o -d /dev/sda -n ${PROV_HOSTNAME} || exit -1
+
+if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
+	echo $((`cat /etc/hostnumber` + 1)) > /etc/hostnumber
+fi
+
+reboot

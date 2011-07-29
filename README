@@ -110,8 +110,11 @@ installer, please follow the next steps:
  - Boot from the USB, and the installation process will begin once is booted
  - Once distro11s is installed, the target will reboot, loading distro11s
 
-This USB installer approach is very convenience when installing distro11s on a
-big number of machines.
+This USB installer approach is convenient when installing distro11s on many
+machines.  Note, however, that data throughput between the development machine
+and a USB drive varies dramatically.  In some cases, copying the half GB or so
+of data may take 30 minutes or even longer.  Consider using a
+higher-performance external USB harddrive.
 
 TIPS AND TRICKS
 ###############

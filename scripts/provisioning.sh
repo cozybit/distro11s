@@ -1,24 +1,22 @@
 #!/bin/bash
 
 DRIVE=/mnt/distross
-REBOOT=n
-USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-u] [-n <name>] [-v]"
+USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-n <name>] [-v]"
 INSTALLER=n
-USB_MODE=n
 VERBOSE=n
+# By default, the configuration comes from the distro11s.conf file.
+# Alternatively, it can come from the environment.
+CONFIG_OVERRIDE=n
 
-while getopts "d:ruhin:v" options; do
+while getopts "d:ohin:v" options; do
     case $options in
         d ) DEV=${OPTARG};;
-        r ) REBOOT='y';;
-        u ) USB_MODE='y';;
+        o ) CONFIG_OVERRIDE='y';;
         i ) INSTALLER='y';;
         n ) HOSTNAME=${OPTARG};;
         v ) VERBOSE='y';;
         h ) echo "Options:"
             echo "-d <device>    Set the device to provision"
-            echo "-r             Reboot the local machine after provisioning"
-            echo "-u             Set the USB provisioning mode"
             echo "-n <name>      Change the hostname of the provisioning system"
             echo "-i             Set the USB Installer creation mode"
             echo "-v             set verbose mode"
@@ -35,19 +33,15 @@ if [ "${VERBOSE}" == "y" ]; then
     set -x
 fi
 
-if [ "${USB_MODE}" == "n" ]; then
+if [ "${CONFIG_OVERRIDE}" = "n" ]; then
+	source `dirname $0`/common.sh
+	root_check "This script runs fdisk/mkdosfs/mkfs/etc on ${DEV}"
+	STAGING=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/staging
+	KERNEL=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/bzImage
+fi
 
-    source `dirname $0`/common.sh
-    root_check "This script runs fdisk/mkdosfs/mkfs/etc on ${DEV}"
-    STAGING=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/staging
-    KERNEL=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/bzImage
-    if [ "${INSTALLER}" == "y" ]; then
-        PROV_SCRIPT_PATH=/root/provisioning.sh
-        HOSTNAME=usbinstaller
-    fi
-else
-    STAGING=/staging
-    KERNEL=/boot/bzImage
+if [ "${INSTALLER}" == "y" ]; then
+	HOSTNAME=usbinstaller
 fi
 
 ISVALID=`sudo fdisk -l ${DEV} | wc -l`
@@ -70,6 +64,13 @@ if [ "${ISVALID}" != "0" ]; then
    [ "$?" != "0" ] && { echo "Error: problem reading the partition table of ${DEV}. Aborting distro11s provisioning"; exit 1; }
    echo "Rereading the partition table of ${DEV}"
    sudo sfdisk -R ${DEV}
+   count=5
+   while [ ${count} -gt 0 ]; do
+       [ -e ${DEV}1 ] && break
+       count=$((${count}+1))
+       sleep 1
+   done
+   [ ! -e ${DEV}1 ] && { echo "Error: failed to find new partition ${DEV}1"; exit 1;}
    echo "Creating the EXT3 file system for ${DEV}1"
    sudo mkfs -t ext3 -m 1 ${DEV}1
    [ "$?" != "0" ] && { echo "Error: problem formating the partition. Aborting distro11s provisioning"; exit 1; }
@@ -87,7 +88,9 @@ if [ "${ISVALID}" != "0" ]; then
    [ "$?" != "0" ] && { echo "Error: grub installation failed. Aborting distro11s provisioning"; exit 1; }
 
    if [ "${INSTALLER}" == "n" ]; then
-
+	   # In this case, we're actually provisioning the harddrive that will be
+	   # plopped into the device and booted.  So just put grub down and be
+	   # done.
        echo "Creating grub config file"
        echo "$(cat <<EOF
 set root=(hd0,msdos1)
@@ -95,10 +98,13 @@ linux /boot/bzImage root=/dev/sda1
 boot
 EOF
 )" > /tmp/grub.cfg
-   sudo mv /tmp/grub.cfg ${DRIVE}/boot/grub/
+	   sudo mv /tmp/grub.cfg ${DRIVE}/boot/grub/
 
    else
-
+	   # In this case, we are making a USB installer.  This thing must boot
+	   # itself then copy the staged rootfs over to the local harddrive on the
+	   # device.  To do this it needs a special rc.local script and a copy of
+	   # the staged rootfs.
        echo "Creating grub config file"
        echo "$(cat <<EOF
 set root=(hd0,msdos1)
@@ -110,12 +116,18 @@ EOF
        echo "Copying the file system to provision"
        sudo mkdir ${DRIVE}/staging
        sudo cp -ra ${STAGING}/* ${DRIVE}/staging
-       echo "Adding provisioning script to rc.local"
-       sudo cp ${TOP}/scripts/provisioning.sh ${DRIVE}${PROV_SCRIPT_PATH}
-       sudo chmod +x ${DRIVE}${PROV_SCRIPT_PATH}
-       sudo sed -i -e '$d' ${DRIVE}/etc/rc.local
-       echo -e "${PROV_SCRIPT_PATH} -d /dev/sda -u -n zotact  \nexit 0" >> ${DRIVE}/etc/rc.local
-
+       echo "Adding provisioning rc.local script and its dependencies"
+       sudo cp ${TOP}/scripts/provisioning.sh ${DRIVE}/usr/local/bin/
+       sudo cp ${TOP}/scripts/installer.rc.local ${DRIVE}/etc/rc.local
+       sudo chmod +x ${DRIVE}/etc/rc.local
+       sudo cp ${DISTRO11S_CONF} ${DRIVE}/etc/distro11s.conf
+	   # We don't want to apt-get install grub because it will mess with our
+	   # MBR.  But we need it on the installer.  So grab it from the host
+	   # system.  Note the smartest thing to do.  Oh well.
+	   sudo cp /usr/bin/grub-* ${DRIVE}/usr/bin/ || exit 1
+	   sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
+	   sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
+	   sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper || exit 1
    fi
 
    if [ "${HOSTNAME}" != "" ]; then
@@ -133,11 +145,6 @@ EOF
        echo "distro11s provisioning complete!"
    else
        echo "distro11s usb installer created!"
-   fi
-
-   if [ "${REBOOT}" == "y" ]; then
-       echo "Rebooting the system"
-       sudo reboot
    fi
 
 else
