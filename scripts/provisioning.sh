@@ -4,8 +4,8 @@ DRIVE=/mnt/distross
 USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-n <name>] [-v]"
 INSTALLER=n
 VERBOSE=n
-# By default, the configuration comes from the distro11s.conf file.
-# Alternatively, it can come from the environment.
+# By default, some configuration variables come from the distro11s.conf file.
+# Alternatively, they can come from the environment.
 CONFIG_OVERRIDE=n
 
 while getopts "d:ohin:v" options; do
