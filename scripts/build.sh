@@ -25,14 +25,6 @@ while getopts "h" opt; do
   esac
 done
 
-# prepare the base rootfs
-ROOTFS=${TOP}/board/${DISTRO11S_BOARD}/base_rootfs.sh
-if [ -e ${ROOTFS} ]; then
-	${ROOTFS} || exit $?
-else
-	echo "WARNING: No base rootfs script.  Proceeding anyway."
-fi
-
 # Go package by package and build
 rm -f ${STAGING}/etc/distro11s-versions
 PACKAGES=`cat ${PKGLIST}`
