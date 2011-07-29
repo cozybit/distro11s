@@ -28,6 +28,26 @@ export KERNEL=/boot/bzImage
 
 /usr/local/bin/provisioning.sh -o -d /dev/sda -n ${PROV_HOSTNAME} || exit -1
 
+# Set the auto-increment IP address
+mount /dev/sda1 /mnt || exit 1
+
+if [ "${DISTRO11S_STATIC_IFACE}" != "" ]; then
+	PROV_IP=${DISTRO11S_STATIC_IP}
+    if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
+		SUFFIX=$((`echo ${PROV_IP} | cut -d '.' -f 4` + `cat /etc/hostnumber`))
+		PROV_IP=`echo ${PROV_IP} | cut -d '.' -f 1-3`".${SUFFIX}"
+	fi
+	echo "$(cat <<EOF
+auto ${DISTRO11S_STATIC_IFACE}
+iface ${DISTRO11S_STATIC_IFACE} inet static
+ address ${PROV_IP}
+ netmask ${DISTRO11S_STATIC_NM}
+EOF
+)" > /mnt/etc/network/interfaces
+fi
+
+umount /dev/sda1
+
 if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
 	echo $((`cat /etc/hostnumber` + 1)) > /etc/hostnumber
 fi
