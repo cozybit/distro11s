@@ -92,7 +92,7 @@ The provisioning.sh script allows you to provision distro11s onto a hard drive.
 In order to do this, please follow the next steps:
 
  - Get a hard drive and connect it to your dev machine.
- - Get the its device name (fdisk -l)
+ - Get the its device name possibly from fdisk -l or dmesg (e.g., /dev/sdb)
  - Run the next command:
    $ ./scripts/provisioning.sh -d <devicename> -n <hostname>
  - Install the hard drive back on the target
@@ -103,7 +103,7 @@ distro11s by just plugging the USB key into the target. To create a USB
 installer, please follow the next steps:
 
  - Connect your USB device to your dev machine (2Gb minimum)
- - Make sure that you get your device (fdisk -l)
+ - Get the its device name possibly from fdisk -l or dmesg (e.g., /dev/sdb)
  - Run the next command:
    $ ./scripts/provisioning.sh -d <device> -i
  - Unplug the USB device and connect it to the TARGET

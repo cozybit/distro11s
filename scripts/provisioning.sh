@@ -67,24 +67,24 @@ if [ "${ISVALID}" != "0" ]; then
        echo "WARNING: unkown version of fdisk.  Proceeding anyway."
    fi
    echo -e -n n\\np\\n1\\n\\n\\na\\n1\\nw\\n | sudo fdisk ${DEV} > /dev/null
+   [ "$?" != "0" ] && { echo "Error: problem reading the partition table of ${DEV}. Aborting distro11s provisioning"; exit 1; }
    echo "Rereading the partition table of ${DEV}"
-   [ "$?" != "1" ] || { echo "Error: problem reading the partition table of ${DEV}. Aborting distro11s provisioning"; exit 1; }
    sudo sfdisk -R ${DEV}
    echo "Creating the EXT3 file system for ${DEV}1"
    sudo mkfs -t ext3 -m 1 ${DEV}1
-   [ "$?" != "1" ] || { echo "Error: problem formating the partition. Aborting distro11s provisioning"; exit 1; }
+   [ "$?" != "0" ] && { echo "Error: problem formating the partition. Aborting distro11s provisioning"; exit 1; }
    echo "Mounting ${DEV}1"
    sudo mkdir -p ${DRIVE}
    sudo mount ${DEV}1 ${DRIVE}
-   [ "$?" != "1" ] || { echo "Error: problem mounting the partition ${DEV}1. Aborting distro11s provisioning"; exit 1; }
+   [ "$?" != "0" ] && { echo "Error: problem mounting the partition ${DEV}1. Aborting distro11s provisioning"; exit 1; }
    echo "Provisioning distro11s onto ${DEV}1"
    sudo cp -ra ${STAGING}/* ${DRIVE}
-   [ "$?" != "1" ] || { echo "Error: provisioning step failed. Aborting distro11s provisioning"; exit 1; }
+   [ "$?" != "0" ] && { echo "Error: provisioning step failed. Aborting distro11s provisioning"; exit 1; }
    echo "Copying the kernel"
    sudo cp ${KERNEL} ${DRIVE}/boot/
    echo "Installing GRUB"
    sudo grub-install --root-directory=${DRIVE} ${DEV}
-   [ "$?" != "1" ] || { echo "Error: grub installation failed. Aborting distro11s provisioning"; exit 1; }
+   [ "$?" != "0" ] && { echo "Error: grub installation failed. Aborting distro11s provisioning"; exit 1; }
 
    if [ "${INSTALLER}" == "n" ]; then
 
