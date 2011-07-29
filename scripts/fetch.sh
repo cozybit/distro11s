@@ -49,6 +49,11 @@ for p in `cat ${PKGLIST}`; do
 			git am ${TOP}/patches/${NAME}/* || exit 1
 			Q popd
 		fi
+		if [ -d ${TOP}/board/${DISTRO11S_BOARD}/patches/${NAME} ]; then
+			Q pushd ${SRCDIR}
+			git am ${TOP}/board/${DISTRO11S_BOARD}/patches/${NAME}/* || exit 1
+			Q popd
+		fi
 	fi
 done
 echo "all distro11s source packages fetched"
