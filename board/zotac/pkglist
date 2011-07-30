@@ -7,3 +7,5 @@ authsae;git;git@github.com:cozybit/authsae;master
 hostap;git;git://w1.fi/srv/git/hostap.git;master
 hostapd;;;
 rootpassword;;;
+meshkit;;;
+overlay;;;
