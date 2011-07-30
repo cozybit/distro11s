@@ -29,6 +29,14 @@ file system, anybody with that file system and a link to your laptop could log
 in to your development machine!  Seriously!  You will be warned at build time
 about this sort of stuff.  But seriously!  Be careful.
 
+BINARY RELEASES
+###############
+
+If you have a binary release, you must untar it as sudo because it contains a
+rootfs that has some files that belong to root.  Yeah, not so pretty.  Sorry.
+Anyway, at that point, follow the board-specific README for your binary to
+learn how to deploy it to your hardware.
+
 SETTING UP YOUR DEVELOPMENT SYSTEM
 ##################################
 
