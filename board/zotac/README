@@ -29,3 +29,7 @@ distro11s.  Here's how:
    configured a static IP address scheme, you can attempt to ping that IP
    address.  Once this succeeds, you can expect that your zotac no longer needs
    its USB drive attached and that provisioning succeeded.
+
+4. If you configured DISTRO11S_AUTO_INCREMENT_INSTALLER, you can now proceed to
+   provision the next zotac.  It will have an incremented hostname (e.g.,
+   zotac-2) and IP address (e.g., 192.168.1.192).
