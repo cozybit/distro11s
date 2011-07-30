@@ -1,3 +1,22 @@
 #!/bin/bash
 
-echo "meshkit!"
+CONF=/etc/meshkit/meshkit.conf
+
+function die {
+	echo ${*}
+	iw dev mesh0 del &> /dev/null
+	exit -1
+}
+
+[ -e ${CONF} ] || die "Config file ${CONF} does not exist"
+
+source ${CONF}
+
+if [ "${MESH_IF}" != "" ]; then
+	echo "Starting mesh on ${MESH_IF}"
+	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
+	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
+	# For now, we just support static IP
+	ifconfig mesh0 ${MESH_IP} || die "Failed to bring up mesh interface"
+	iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
+fi
