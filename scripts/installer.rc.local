@@ -46,6 +46,8 @@ EOF
 )" > /mnt/etc/network/interfaces
 fi
 
+cat /etc/hostnumber > /mnt/etc/distro11s-hostnumber
+
 umount /dev/sda1
 
 if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
