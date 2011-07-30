@@ -9,9 +9,15 @@ GIT_URL=git@github.com:cozybit/distro11s
 function build_for_board {
 	rm -rf src/*
 	echo "Configuring..."
-	echo "$(cat <<EOF
+	if [ -e ./board/${1}/distro11s-release.conf ]; then
+		cp ./board/${1}/distro11s-release.conf ./distro11s.conf
+		# override the GIT_REFERENCE and jobs as needed
+		echo "DISTRO11S_GIT_REFERENCE=${DISTRO11S_GIT_REFERENCE}" >> ./distro11s.conf
+		echo "DISTRO11S_JOBS=${CORES}" >> ./distro11s.conf
+	else
+		echo "$(cat <<EOF
 DISTRO11S_BOARD=${1}
-DISTRO11S_SRC=${PWD}/src
+DISTRO11S_SRC=${PWD}/${1}-src
 DISTRO11S_OUT=${PWD}/out
 DISTRO11S_JOBS=${CORES}
 DISTRO11S_HOST_IP=192.168.55.1
@@ -22,6 +28,7 @@ DISTRO11S_SSHFS_AUTOMOUNT_PATH=""
 DISTRO11S_GIT_REFERENCE=${DISTRO11S_GIT_REFERENCE}
 EOF
 )" > distro11s.conf
+	fi
 	./scripts/fetch.sh || { echo Failed to fetch source; exit 1; }
 	./scripts/build.sh || { echo Failed to build source; exit 1; }
 }
@@ -76,6 +83,10 @@ if [ "${BOARDS}" = "" ]; then
 	exit 1
 fi
 
+# Set the DISTRO11S_CONF to "" after we source it so that it doesn't influence
+# the release build.
+DISTRO11S_CONF=""
+
 if [ "$COMMAND" == "CREATE" ]; then
 
 	echo "creating $PKG version $VERSION"
@@ -96,6 +107,16 @@ if [ "$COMMAND" == "CREATE" ]; then
 	for b in ${BOARDS}; do
 		build_for_board $b
 	done
+
+	# Create a binary release with a suitable name
+	BINNAME=${PKG}-bin
+	for b in ${BOARDS}; do
+		BINNAME=${BINNAME}-${b}
+	done
+	BINNAME=${BINNAME}-${VERSION}.tar.gz
+	cd ..
+	sudo tar --exclude '.git*' --exclude '*-src' -czf $BINNAME $PKG-$VERSION || { echo Failed to create binary archive.; exit 1; }
+	cd ${PKGDIR}
 
 	# TODO: now we must test each board.  Perhaps some of this can be
 	# automated?  Perhaps the binaries for the boards should be captured
