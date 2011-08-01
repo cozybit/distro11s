@@ -120,7 +120,6 @@ EOF
        sudo cp ${TOP}/scripts/provisioning.sh ${DRIVE}/usr/local/bin/
        sudo cp ${TOP}/scripts/installer.rc.local ${DRIVE}/etc/rc.local
        sudo chmod +x ${DRIVE}/etc/rc.local
-       sudo cp ${DISTRO11S_CONF} ${DRIVE}/etc/distro11s.conf
 	   # We don't want to apt-get install grub because it will mess with our
 	   # MBR.  But we need it on the installer.  So grab it from the host
 	   # system.  Note the smartest thing to do.  Oh well.
