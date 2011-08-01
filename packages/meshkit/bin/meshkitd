@@ -71,6 +71,8 @@ if [ "${MESH_IF}" != "" ]; then
 
 	ifconfig -a | grep mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
 
+	ifconfig -a | grep ${MESH_IF} &> /dev/null || die "No such iface ${MESH_IF}"
+
 	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
 	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
 	# For now, we just support static IP
@@ -80,6 +82,9 @@ if [ "${MESH_IF}" != "" ]; then
 fi
 
 if [ "${CTL_IF}" != "" ]; then
+
+	ifconfig -a | grep ${CTL_IF} &> /dev/null || die "No such iface ${CTL_IF}"
+
 	# Try over and over to bring up the control interface.
 	ifconfig ${CTL_IF} down || die "Failed to bring down control iface"
 
