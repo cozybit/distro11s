@@ -25,7 +25,7 @@ function fetch {
 	DEST=${DISTRO11S_SRC}/${NAME}
 	if [ ${1} = "git" ]; then
 		GIT="git clone"
-		if [ "${DISTRO11S_GIT_REFERENCE}" != "" ]; then
+		if [ "${DISTRO11S_GIT_REFERENCE}" != "" -a -e ${DISTRO11S_GIT_REFERENCE}/${2}; then
 			GIT="${GIT} --reference ${DISTRO11S_GIT_REFERENCE}/${2}"
 		fi
 		echo "${GIT}"
