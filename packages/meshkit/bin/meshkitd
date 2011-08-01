@@ -2,10 +2,32 @@
 
 CONF=/etc/meshkit/meshkit.conf
 
+[ "${DEBUG}" = "" ] && DEBUG=0
+[ ${DEBUG} = 1 ] && set -x
+
 function die {
 	echo ${*}
 	iw dev mesh0 del &> /dev/null
 	exit -1
+}
+
+function try {
+	if [ ${DEBUG} = 1 ]; then
+		echo $*
+		eval $*
+		RESULT=$?
+	else
+		eval $* &> /dev/null
+		RESULT=$?
+	fi
+	if [ ! ${RESULT} -eq 0 ]; then
+		echo "Failed (${RESULT}).  Trying again in 5s"
+		sleep 5
+		return 1
+	else
+		echo "Success"
+		return 0
+	fi
 }
 
 [ -e ${CONF} ] || die "Config file ${CONF} does not exist"
@@ -13,10 +35,70 @@ function die {
 source ${CONF}
 
 if [ "${MESH_IF}" != "" ]; then
-	echo "Starting mesh on ${MESH_IF}"
+	echo -n "Starting mesh on ${MESH_IF}..."
+
+	ifconfig -a | grep mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
+
 	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
 	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
 	# For now, we just support static IP
 	ifconfig mesh0 ${MESH_IP} || die "Failed to bring up mesh interface"
 	iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
+	echo "Success"
+fi
+
+if [ "${CTL_IF}" != "" ]; then
+	# Try over and over to bring up the control interface.
+	ifconfig ${CTL_IF} down || die "Failed to bring down control iface"
+
+	while true; do
+
+		echo -n "Bringing up control interface ${CTL_IF}..."
+		try "ifconfig ${CTL_IF} up" || continue
+
+		if [ "${CTL_SSID}" != "" ]; then
+			while true; do
+				echo -n "Scanning for control network ${CTL_SSID}..."
+				try "iw dev ${CTL_IF} scan | grep -e '[[:space:]]*SSID: '${CTL_SSID}'$'" || continue
+				break;
+			done
+
+			echo -n "Connecting to control network ${CTL_SSID}..."
+			try iw ${CTL_IF} connect ${CTL_SSID} || continue
+			COUNT=20
+			while [ ${COUNT} -gt 0 ]; do
+				STATUS=`iw wlan1 link | head -1 | awk '{print $1}'`
+				if [ "${STATUS}" = "Connected" ]; then
+					break;
+				fi
+				COUNT=$((${COUNT} - 1))
+				sleep 1
+			done
+			if [ ! ${COUNT} -gt 0 ]; then
+				echo "Failed to connect to ${CTL_SSID}.  Trying again in 5s."
+				sleep 5
+				continue
+			fi
+		fi
+
+		# Set the IP address for the ctl interface
+		if [ "${CTL_IP}" = "" ]; then
+			echo "DHCP unsupported at this time."
+			exit 1
+		else
+			echo -n "Assigning IP address..."
+			try ifconfig ${CTL_IF} ${CTL_IP} || continue
+		fi
+
+		# If we actually make it all the way to the end, we're connected.  Now
+		# we poll to ensure that we stay connected.
+		while true; do
+			STATUS=`iw wlan1 link | head -1 | awk '{print $1}'`
+			if [ "${STATUS}" != "Connected" ]; then
+				echo "Lost control link.  Re connecting."
+				break
+			fi
+			sleep 5
+		done
+	done
 fi
