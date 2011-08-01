@@ -90,6 +90,7 @@ DISTRO11S_CONF=""
 if [ "$COMMAND" == "CREATE" ]; then
 
 	echo "creating $PKG version $VERSION"
+	export DISTRO11S_RELEASE_VERSION=${VERSION}
 	PKGDIR=/tmp/$PKG-$VERSION
 	if [ -d $PKGDIR ]; then
 		warn_user "About to blow away $PKGDIR as sudo."
