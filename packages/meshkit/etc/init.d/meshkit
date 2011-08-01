@@ -1,0 +1,43 @@
+#! /bin/bash
+
+### BEGIN INIT INFO
+# Provides:		meshkitd
+# Required-Start:	$networking $syslog
+# Required-Stop:	$networking $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:
+# Short-Description:	simplified mesh network management
+### END INIT INFO
+
+set -e
+
+. /lib/lsb/init-functions
+
+export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+export LD_LIBRARY_PATH=/usr/local/lib
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting meshkitd"
+	if start-stop-daemon --start --quiet --oknodo -b --exec /usr/local/bin/meshkitd; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
+	;;
+
+  stop)
+	log_daemon_msg "Stopping meshkitd"
+	if start-stop-daemon --stop --quiet --oknodo --exec /usr/local/bin/meshkitd; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
+	;;
+
+  *)
+	log_action_msg "Usage: /etc/init.d/meshkit {start|stop}"
+	exit 1
+esac
+
+exit 0
