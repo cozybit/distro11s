@@ -19,3 +19,9 @@ if [ ! -e ${STAMPS}/debian-rootfs.basepkgs -o ${FORCE_BUILD} -eq 1 ]; then
 fi
 
 cp ${DISTRO11S_CONF} ${STAGING}/etc/distro11s.conf || exit 1
+
+if [ "${DISTRO11S_RELEASE_VERSION}" = "" ]; then
+	echo "DEVELOPMENT VERSION" > ${STAGING}/etc/distro11s-versions
+else
+	echo "distro11s release ${DISTRO11S_RELEASE_VERSION}"
+fi

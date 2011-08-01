@@ -29,12 +29,6 @@ done
 rm -f ${STAGING}/etc/distro11s-versions
 mkdir -p ${STAGING}/etc/
 
-if [ "${DISTRO11S_RELEASE_VERSION}" = "" ]; then
-	echo "DEVELOPMENT VERSION" > ${STAGING}/etc/distro11s-versions
-else
-	echo "distro11s release ${DISTRO11S_RELEASE_VERSION}"
-fi
-
 PACKAGES=`cat ${PKGLIST}`
 for p in ${PACKAGES}; do
 	parse_pkg $p
