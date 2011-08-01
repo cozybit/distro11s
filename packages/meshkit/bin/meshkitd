@@ -30,9 +30,33 @@ function try {
 	fi
 }
 
+# add count $2 to base IP address $1
+function increment_ip {
+	SUFFIX=$((`echo ${1} | cut -d '.' -f 4` + ${2}))
+	NEW_IP=`echo ${1} | cut -d '.' -f 1-3`".${SUFFIX}"
+	echo ${NEW_IP}
+}
+
 [ -e ${CONF} ] || die "Config file ${CONF} does not exist"
 
 source ${CONF}
+
+# Calculate updated IP addresses if configured to do so
+REAL_MESH_IP=${MESH_IP}
+REAL_CTL_IP=${CTL_IP}
+
+if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
+	source /etc/distro11s.conf
+	if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
+		HOSTNUM=`cat /etc/distro11s-hostnumber`
+		if [ "${MESH_IP}" != "" ]; then
+			REAL_MESH_IP=`increment_ip ${MESH_IP} ${HOSTNUM}`
+		fi
+		if [ "${CTL_IP}" != "" ]; then
+			REAL_CTL_IP=`increment_ip ${CTL_IP} ${HOSTNUM}`
+		fi
+	fi
+fi
 
 if [ "${MESH_IF}" != "" ]; then
 	echo -n "Starting mesh on ${MESH_IF}..."
@@ -42,7 +66,7 @@ if [ "${MESH_IF}" != "" ]; then
 	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
 	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
 	# For now, we just support static IP
-	ifconfig mesh0 ${MESH_IP} || die "Failed to bring up mesh interface"
+	ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to bring up mesh interface"
 	iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
 	echo "Success"
 fi
@@ -82,12 +106,12 @@ if [ "${CTL_IF}" != "" ]; then
 		fi
 
 		# Set the IP address for the ctl interface
-		if [ "${CTL_IP}" = "" ]; then
+		if [ "${REAL_CTL_IP}" = "" ]; then
 			echo "DHCP unsupported at this time."
 			exit 1
 		else
 			echo -n "Assigning IP address..."
-			try ifconfig ${CTL_IF} ${CTL_IP} || continue
+			try ifconfig ${CTL_IF} ${REAL_CTL_IP} || continue
 		fi
 
 		# If we actually make it all the way to the end, we're connected.  Now
