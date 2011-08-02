@@ -21,7 +21,8 @@ fi
 cp ${DISTRO11S_CONF} ${STAGING}/etc/distro11s.conf || exit 1
 
 if [ "${DISTRO11S_RELEASE_VERSION}" = "" ]; then
-	echo "DEVELOPMENT VERSION" > ${STAGING}/etc/distro11s-versions
+	Q pushd ${TOP}
+	echo "distro11s development " `git log | head -1 | awk '{print $2}'` >> ${STAGING}/etc/distro11s-versions
 else
-	echo "distro11s release ${DISTRO11S_RELEASE_VERSION}"
+	echo "distro11s release ${DISTRO11S_RELEASE_VERSION}" >> ${STAGING}/etc/distro11s-versions
 fi

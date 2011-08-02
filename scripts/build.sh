@@ -46,6 +46,11 @@ for p in ${PACKAGES}; do
 	$S || exit $?
 
 	# Add versioning for each package
-	echo ${NAME} ${URL} `pkg_version ${VCS} ${SRCDIR}`>> ${STAGING}/etc/distro11s-versions
+	VERSION=`pkg_version ${VCS} ${SRCDIR}`
+	if [ "${VERSION}" = "" ]; then
+		echo ${NAME} "[builtin to distro11s]" >> ${STAGING}/etc/distro11s-versions
+	else
+		echo ${NAME} ${URL} `pkg_version ${VCS} ${SRCDIR}`>> ${STAGING}/etc/distro11s-versions
+	fi
 done
 echo "distro11s build complete."

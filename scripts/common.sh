@@ -112,7 +112,6 @@ function pkg_version {
 		Q pushd ${2}
 		git svn log 2> /dev/null | head -2 | tail -1 | awk '{print $1}'
 	else
-		echo "Unsupported version control system ${1}"
 		return 1
 	fi
 }
