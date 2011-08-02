@@ -14,19 +14,18 @@ else
 	exit 1
 fi
 
+# Fix up our hostname so sudo works as expected
+HOSTNAME="$(cat /etc/hostname)"
+sed -i '$a127.0.0.1     '${HOSTNAME}'' /etc/hosts
+
 if [ ! -e /etc/hostnumber ]; then
 	echo 0 > /etc/hostnumber
-fi
-
-PROV_HOSTNAME=${DISTRO11S_HOSTNAME}
-if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
-	PROV_HOSTNAME=${PROV_HOSTNAME}-`cat /etc/hostnumber`
 fi
 
 export STAGING=/staging
 export KERNEL=/boot/bzImage
 
-/usr/local/bin/provisioning.sh -o -d /dev/sda -n ${PROV_HOSTNAME} || exit -1
+/usr/local/bin/provisioning.sh -o -d /dev/sda || exit -1
 
 # Set the auto-increment IP address
 mount /dev/sda1 /mnt || exit 1

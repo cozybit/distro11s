@@ -8,16 +8,14 @@ VERBOSE=n
 # Alternatively, they can come from the environment.
 CONFIG_OVERRIDE=n
 
-while getopts "d:ohin:v" options; do
+while getopts "d:ohiv" options; do
     case $options in
         d ) DEV=${OPTARG};;
         o ) CONFIG_OVERRIDE='y';;
         i ) INSTALLER='y';;
-        n ) HOSTNAME=${OPTARG};;
         v ) VERBOSE='y';;
         h ) echo "Options:"
             echo "-d <device>    Set the device to provision"
-            echo "-n <name>      Change the hostname of the provisioning system"
             echo "-i             Set the USB Installer creation mode"
             echo "-v             set verbose mode"
             echo "-h             Print help"
@@ -38,10 +36,6 @@ if [ "${CONFIG_OVERRIDE}" = "n" ]; then
 	root_check "This script runs fdisk/mkdosfs/mkfs/etc on ${DEV}"
 	STAGING=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/staging
 	KERNEL=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/bzImage
-fi
-
-if [ "${INSTALLER}" == "y" ]; then
-	HOSTNAME=usbinstaller
 fi
 
 ISVALID=`sudo fdisk -l ${DEV} | wc -l`
@@ -127,13 +121,6 @@ EOF
 	   sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
 	   sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
 	   sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper || exit 1
-   fi
-
-   if [ "${HOSTNAME}" != "" ]; then
-        echo "Configuring hostname"
-        echo ${HOSTNAME} >> /tmp/hostname
-        sudo mv /tmp/hostname ${DRIVE}/etc/
-        sudo sed -i '$a127.0.0.1     '${HOSTNAME}'' ${DRIVE}/etc/hosts
    fi
 
    echo "Unmounting ${DEV}1"
