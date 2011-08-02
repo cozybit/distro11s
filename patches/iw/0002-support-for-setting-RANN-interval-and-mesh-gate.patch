@@ -1,0 +1,55 @@
+From 7621f50051961aec3f0bcd97c9893cddd8c5b3fa Mon Sep 17 00:00:00 2001
+From: Javier Cardona <javier@cozybit.com>
+Date: Mon, 1 Aug 2011 20:32:06 -0700
+Subject: [PATCH] support for setting RANN interval and mesh gate
+
+---
+ mesh.c    |    4 ++++
+ nl80211.h |    9 +++++++++
+ 2 files changed, 13 insertions(+), 0 deletions(-)
+
+diff --git a/mesh.c b/mesh.c
+index 7c6ab3d..dc8f49c 100644
+--- a/mesh.c
++++ b/mesh.c
+@@ -173,6 +173,10 @@ const static struct mesh_param_descr _mesh_param_descrs[] =
+ 	_my_nla_put_u16, _parse_u16, _print_u16_in_TUs},
+ 	{"mesh_hwmp_rootmode", NL80211_MESHCONF_HWMP_ROOTMODE,
+ 	_my_nla_put_u8, _parse_u8, _print_u8},
++	{"mesh_hwmp_rann_interval", NL80211_MESHCONF_HWMP_RANN_INTERVAL,
++	_my_nla_put_u16, _parse_u16, _print_u16},
++	{"mesh_gate_announcements", NL80211_MESHCONF_GATE_ANNOUNCEMENTS,
++	_my_nla_put_u8, _parse_u8, _print_u8},
+ };
+ 
+ static void print_all_mesh_param_descr(void)
+diff --git a/nl80211.h b/nl80211.h
+index c7ccaae..d386143 100644
+--- a/nl80211.h
++++ b/nl80211.h
+@@ -1803,6 +1803,13 @@ enum nl80211_mntr_flags {
+  * @NL80211_MESHCONF_ELEMENT_TTL: specifies the value of TTL field set at a
+  * source mesh point for path selection elements.
+  *
++ * @NL80211_MESHCONF_HWMP_RANN_INTERVAL:  The interval of time (in TUs) between
++ * root announcements are transmitted.
++ *
++ * @NL80211_MESHCONF_GATE_ANNOUNCEMENTS: Advertise that this mesh station has
++ * access to a broader network beyond the MBSS.  This is done via Root
++ * Announcement frames.
++ *
+  * @NL80211_MESHCONF_ATTR_MAX: highest possible mesh configuration attribute
+  *
+  * @__NL80211_MESHCONF_ATTR_AFTER_LAST: internal use
+@@ -1824,6 +1831,8 @@ enum nl80211_meshconf_params {
+ 	NL80211_MESHCONF_HWMP_NET_DIAM_TRVS_TIME,
+ 	NL80211_MESHCONF_HWMP_ROOTMODE,
+ 	NL80211_MESHCONF_ELEMENT_TTL,
++	NL80211_MESHCONF_HWMP_RANN_INTERVAL,
++	NL80211_MESHCONF_GATE_ANNOUNCEMENTS,
+ 
+ 	/* keep last */
+ 	__NL80211_MESHCONF_ATTR_AFTER_LAST,
+-- 
+1.7.6
+
