@@ -4,10 +4,10 @@ PROVISIONING A ZOTAC
 The recommended way to bring up a Zotac board is to use the usb installer for
 distro11s.  Here's how:
 
-0. Prepare a config file.  Consider using the
-   DISTRO11S_AUTO_INCREMENT_INSTALLER and DISTRO11S_STATIC_IFACE feature to
-   differentiate the IP addresses and hostnames of your zotac nodes.
-   Alternatively, if you are using a binary release:
+0. Prepare a config file.  Consider setting DISTRO11S_STATIC_IFACE and
+   DISTRO11S_HOSTNAME to personalized values to differentiate your zotac nodes
+   from those of your co-developers.  Alternatively, if you are using a binary
+   release and wish to use the default settings, set:
 
    export DISTRO11S_CONF=$PWD/board/zotac/distro11s-release.conf
 
@@ -30,6 +30,5 @@ distro11s.  Here's how:
    address.  Once this succeeds, you can expect that your zotac no longer needs
    its USB drive attached and that provisioning succeeded.
 
-4. If you configured DISTRO11S_AUTO_INCREMENT_INSTALLER, you can now proceed to
-   provision the next zotac.  It will have an incremented hostname (e.g.,
-   zotac-2) and IP address (e.g., 192.168.1.192).
+4. You can now proceed to provision the next zotac.  It will have an
+   incremented hostname (e.g., zotac-2) and IP address (e.g., 192.168.1.192).

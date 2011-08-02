@@ -10,6 +10,17 @@ latest and greatest.  This document explains all the steps needed to build
 distro11s.  For details on the supported target boards, see the README files in
 the board/ directory.
 
+distro11s is typically deployed uniformly on several identical nodes.  Each
+node needs its own name and IP addresses.  To save developers from having to
+maintain special DHCP configurations for assigning these, distro11s uses a
+simple host number.  The host number is the only board-specific configuration
+value, and it lives in /etc/distro11s-hostnumber.  It is typically set by an
+installer that increments his own counter every time he successfully installs
+distro11s on a target.  It is perfectly legal for /etc/distro11s-hostnumber to
+not exist.  But when it does exist, it influences various system settings, most
+notably static IP addresses and the hostname.  See distro11s.sample.conf for
+more details.
+
 SAFETY AND SECURITY
 ###################
 

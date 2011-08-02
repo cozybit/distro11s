@@ -55,7 +55,7 @@ REAL_CTL_IP=${CTL_IP}
 
 if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 	source /etc/distro11s.conf
-	if [ ${DISTRO11S_AUTO_INCREMENT_INSTALLER} -eq 1 ]; then
+	if [ -e /etc/distro11s-hostnumber ]; then
 		HOSTNUM=`cat /etc/distro11s-hostnumber`
 		if [ "${MESH_IP}" != "" ]; then
 			REAL_MESH_IP=`increment_ip ${MESH_IP} ${HOSTNUM}`
