@@ -147,7 +147,12 @@ TIPS AND TRICKS
 -- The stamp system is not very sophisticated at this time.  It's mostly used
    for the release procedure, which is a complete clean build.  As you develop,
    you may find it easier to hop around the DISTRO11S_SRC directory manually
-   invoking make/make install (or whatever).
+   invoking make/make install (or whatever).  Alternatively, you can invoke the
+   build script with FORCE_BUILD=1.  For example, if you want to execute ALL of
+   the build steps for the kernel (including coping the config over!) you can
+   say:
+
+   FORCE_BUILD=1 ./scripts/kernel.sh
 
 -- Avoid using sudo.  But if you must (e.g., mount, debootstrap, etc.), use the
    root_check function before invoking sudo.  This alerts the user.
