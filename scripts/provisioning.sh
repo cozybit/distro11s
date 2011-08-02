@@ -7,15 +7,20 @@ VERBOSE=n
 # By default, some configuration variables come from the distro11s.conf file.
 # Alternatively, they can come from the environment.
 CONFIG_OVERRIDE=n
+HOSTNUM=""
 
-while getopts "d:ohiv" options; do
+while getopts "d:ohin:v" options; do
     case $options in
         d ) DEV=${OPTARG};;
         o ) CONFIG_OVERRIDE='y';;
         i ) INSTALLER='y';;
+        n ) HOSTNUM=${OPTARG};;
         v ) VERBOSE='y';;
         h ) echo "Options:"
             echo "-d <device>    Set the device to provision"
+            echo "-n <number>    The host number of the device you are provisioning"
+			echo "               If -i is set, this is the initial host number that"
+			echo "               will be used by the installer."
             echo "-i             Set the USB Installer creation mode"
             echo "-v             set verbose mode"
             echo "-h             Print help"
@@ -121,6 +126,16 @@ EOF
 	   sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
 	   sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
 	   sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper || exit 1
+   fi
+
+   if [ "${HOSTNUM}" != "" ]; then
+        echo "Configuring hostnumber"
+        echo ${HOSTNUM} >> /tmp/distro11s-hostnumber
+		if [ "${INSTALLER}" == "y" ]; then
+			sudo mv /tmp/distro11s-hostnumber ${DRIVE}/etc/hostnumber
+		else
+			sudo mv /tmp/distro11s-hostnumber ${DRIVE}/etc/
+		fi
    fi
 
    echo "Unmounting ${DEV}1"

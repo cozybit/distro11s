@@ -30,19 +30,6 @@ sudo mv -f ${STAGING}/etc/inittab.new ${STAGING}/etc/inittab
 sed 's/^root:\*:\(.*\)$/root::\1/' < ${STAGING}/etc/shadow >  ${STAGING}/etc/shadow.new
 mv -f ${STAGING}/etc/shadow.new ${STAGING}/etc/shadow
 
-echo "Setting up static ip"
-# set up static IP address if necessary
-if [ "${DISTRO11S_STATIC_IFACE}" != "" ]; then
-	echo "$(cat <<EOF
-auto ${DISTRO11S_STATIC_IFACE}
-iface ${DISTRO11S_STATIC_IFACE} inet static
- address ${DISTRO11S_STATIC_IP}
- netmask ${DISTRO11S_STATIC_NM}
-EOF
-)" > ${STAGING}/etc/network/interfaces
-	rm -f ${STAGING}/etc/udev/rules.d/70-persistent-net.rules
-fi
-
 # Set up the sshfs automount if specified
 if [ "${DISTRO11S_SSHFS_AUTOMOUNT_PATH}" != "" -a \
 	"${DISTRO11S_HOST_IP}" != ""  ]; then
