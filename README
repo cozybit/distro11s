@@ -160,3 +160,32 @@ TIPS AND TRICKS
 -- If you're adding a new build script, try to make it repeatable.  That is, if
    I blow away all of the stamp files and invoke your build script, it should
    do the right thing.
+
+-- Make a minor change to a package and just want to push your changes to a
+   node that you already provisioned?  Try this:
+
+   $ FORCE_BUILD=1 ./scripts/<package>.sh
+   $ ./scripts/push.sh root@ipaddr-of-target
+
+-- If you want to save yourself the trouble of entering your password every
+   time you ./scripts/push.sh, you must set up the root user
+   _on_your_dev_machine_ to have a password-less ssh key, and you must
+   ssh-copy-id that key over to each device to which you wish to push.sh.  The
+   reason is that push.sh rsyncs as sudo.
+
+-- Got some operation you want to perform on each node?  Consider using the
+   foreach.sh script.  You'll have to set the DISTRO11S_NUM_NODES variable in
+   your config file, then you can say something like:
+
+   ./scripts/foreach.sh './scripts/push.sh -u root@$HOSTNAME.local'
+
+   Your little bit in single quotes will get executed once for each node.  The
+   vars that are set by the foreach.sh script (currently) include:
+
+   HOSTNUM: The hostnumber
+
+   IP: The IP address of the node formed by adding his hostnumber to
+   DISTRO11S_STATIC_IP.
+
+   HOSTNAME: The hostname of the node formed by adding his hostnumber to
+   DISTRO11S_HOSTNAME.
