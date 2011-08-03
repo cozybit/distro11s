@@ -64,14 +64,22 @@ The development cycle
    $ git rebase wt distro11s-dev
    [ resolve any conflicts ]
 
+
 1. Bob is a open80211s developer.  Last week he submitted a patchset containing
    3 patches that support the "next big thing" (nbt) and submits them to
    linux-wireless mailing list.  He expects these patches to go in the next
-   distro11s release, so he --bcc's distro11s@cozybit.com.  You fetch these
-   patches into your kernel directory.  Let's call the patches 1.patch,
+   distro11s release, so he --bcc's distro11s@cozybit.com.
+   
+   
+2. There are two different process to get andapply Bob's patches:
+
+   2.1 MAILINGN LIST
+   -----------------
+
+   You fetch these patches into your kernel directory.  Let's call the patches 1.patch,
    2.patch, and 3.patch.
 
-2. Apply Bob's patches:
+   Apply Bob's patches:
 
    $ git am 1.patch 2.patch 3.patch
 
@@ -80,7 +88,40 @@ The development cycle
    conflicts yourself, or ask Bob to rebase his patches to wireless-testing
    HEAD and resubmit to distro11s@cozybit.com.
 
-3. Repeat steps 1-2 for Alice's patches and the patches from any other
+   This approach is very useful if Bob is a developer located somewhere in the universe
+
+   2.2 FETCHING THE DEVELOPER's PATCH BRANCH
+   -----------------------------------------
+
+   In this approach, Bob has two different branches available in his working directory:
+
+     - Development branch: this is the branch where Bob uses to do all the
+       magic in form of patches.
+
+     - Patch branch: in this branch, Bob applies all the patches he wrote, but
+       only after submitting them to distro11s/wireless-testing. 
+       
+       Also, Bob makes sure that this branch is syncronized with the wireless
+       testing branch and his patches can be applied without any issues. He is
+       responsable to rebase it.
+       
+       The name of this branch is up to the developer, but it's recommended to
+       use the convention <developername>-patches.
+
+   The release manager has to fetch Bob's Patch branch in order to get the last
+   version of all the patches that bob submitted. The process is this:
+    
+   $ git remote bob ssh://<usename>@<hostname/IP>/path/to/the/git/repo
+   $ git fetch bob bob-patches:bob-patches
+   $ git log
+   Check the commit ids of Bob's patches on top of the last WT commit
+   $ git cherrypick <commitid>
+
+   This approach is very useful if the developers are in close communication
+   with the release manager, both make sure that the patch branch is updated
+
+ 
+3. Repeat the step 1-2 for Alice's patches and the patches from any other
    developers.
 
 4. Push to o11s:
@@ -98,11 +139,11 @@ The development cycle
    upstream.  Bob's patches sustained some comments and he submitted some V2
    patches that have not been accepted yet.  Repeat step 0 above.  This time,
    Alice's patches should be swallowed up in the mainline by the rebase.  Bob's
-   V1 patches will remain at the tip of the distro11s-dev branch.
+   V1 patches will remain at the top of the distro11s-dev branch.
 
-7. Fetch Bob's V2 patch set and use your git skills to replace Bob's V1 patches
-   with his V2 patches.  I like git rebase -i to eliminate Bob's V1 patches and
-   just git am to apply his V2 patches.  After this step, push to o11s as in
-   step 4.
+7. Fetch Bob's V2 patch set (from the mailing list or from bob's patch branch)
+   and use your git skills to replace Bob's V1 patches with his V2 patches.  I
+   like git rebase -i to eliminate Bob's V1 patches and just git am to apply his
+   V2 patches.  After this step, push to o11s as in step 4.
 
 8. Repeat steps 1-5 to capture any new developments and spin the next release.
