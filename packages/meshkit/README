@@ -31,12 +31,17 @@ Configuring mesh node
 
 The configuration file for meshkit lives in /etc/meshkit/meshkit.conf.  It
 contains a number of variables that control its behavior.  These variables are
-documented in meshkit.sample.conf and described above.
+documented in ./meshkit.sample.conf and described above.
 
 Note that the presence of /etc/distro11s-hostnumber and /etc/distro11s.conf
 influence the configuration.  Specifically, if these two files are present,
 static IP addresses, hostnames, etc., will be calculated by adding the host
 number to the value configured in /etc/meshkit/meshkit.conf.
+
+Under the hood, meshkit uses authsae to provide mesh security.  If the
+MESH_PASSWORD is set, various configuration files are generated with "sensible"
+defaults.  If you need to tune some configuration parameters that are not
+exposed, you must edit meshkitd.
 
 Tips and Tricks
 ===============

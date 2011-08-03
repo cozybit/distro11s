@@ -16,6 +16,7 @@ function log {
 function die {
 	log ${*}
 	iw dev mesh0 del &> /dev/null
+	killall meshd-nl80211
 	exit -1
 }
 
@@ -67,17 +68,56 @@ if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 fi
 
 if [ "${MESH_IF}" != "" ]; then
+	[ "${MESH_CHANNEL}" = "" ] && MESH_CHANNEL=6
+
+	# Generate some dependent parameters
+	MESH_BAND=11a
+	if [ ${MESH_CHANNEL} -gt 0 -a ${MESH_CHANNEL} -lt 12 ]; then
+		MESH_BAND=11g
+	fi
+	MESHD_LOG=/var/log/authsae.${MESH_IF}.log
 	log -n "Starting mesh on ${MESH_IF}..."
 
+	# start with a clean house
 	ifconfig -a | grep mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
+	killall meshd-nl80211
 
 	ifconfig -a | grep ${MESH_IF} &> /dev/null || die "No such iface ${MESH_IF}"
-
 	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
 	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
+	ifconfig mesh0 up || die "Failed to bring up mesh interface"
+
+	if [ "${MESH_PASSWORD}" = "" ]; then
+		iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
+	else
+		# Set up secure mesh.  Note that first we must create various config
+		# files required by authsae
+		mkdir -p /var/run/authsae || die "Failed to create authsae config dir"
+		echo "$(cat <<EOF
+debug=480
+password=${MESH_PASSWORD}
+group=19 26 21 25 20
+blacklist=5
+thresh=5
+lifetime=3600
+EOF
+)" >> /var/run/authsae/sae.conf
+
+		echo "$(cat <<EOF
+ssid=${MESH_ID}
+interface=${MESH_IF}
+passive=0
+debug=1
+mediaopt=1
+band=${MESH_BAND}
+channel=${MESH_CHANNEL}
+EOF
+)" >> /var/run/authsae/meshd.conf
+		meshd-nl80211 -i mesh0 -s ${MESH_ID} -I /var/run/authsae &> /dev/null &
+		[ $? -eq 0 ] || die "Failed to launch meshd"
+	fi
 	# For now, we just support static IP
-	ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to bring up mesh interface"
-	iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
+	ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
 	log "Success"
 fi
 

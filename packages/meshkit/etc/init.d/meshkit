@@ -35,8 +35,12 @@ case "$1" in
 	fi
 	;;
 
+  restart)
+		$0 stop
+		$0 start
+		;;
   *)
-	log_action_msg "Usage: /etc/init.d/meshkit {start|stop}"
+	log_action_msg "Usage: /etc/init.d/meshkit {start|stop|restart}"
 	exit 1
 esac
 
