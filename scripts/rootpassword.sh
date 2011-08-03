@@ -3,7 +3,8 @@
 source `dirname $0`/common.sh
 
 if [ "${DISTRO11S_ROOT_PW}" = "" ]; then
-	exit 0
+    echo "Warning! The root password not set. Please, edit the disto11s.conf, and set it. Aborting..."
+	exit 1
 fi
 
 warn_user "This script changes the root pw in ${STAGING}/etc/passwd."
