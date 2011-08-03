@@ -56,7 +56,7 @@ if [ "${DISTRO11S_SSHFS_AUTOMOUNT_PATH}" != "" -a \
 		"/mnt" > ${STAGING}/etc/rc.local
 fi
 
-if [ "${DISTRO11S_SSH_PUB_KEY}" != "" -a -e ${DISTRO11S_SSH_PUB_KEY} ]; then
+if [[ "${DISTRO11S_SSH_PUB_KEY}" != "" && -e ${DISTRO11S_SSH_PUB_KEY} ]]; then
 	mkdir -p ${STAGING}/root/.ssh/
 	AUTH_KEYS=${STAGING}/root/.ssh/authorized_keys
 	if [ ! -e ${AUTH_KEYS} ]; then
