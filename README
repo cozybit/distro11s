@@ -93,7 +93,7 @@ To build all of the packages, say:
 
 $ ./scripts/build.sh
 
-Note that most targets use debbootstrap to prepare the basic rootfs and must be
+Note that all targets use debbootstrap to prepare the basic rootfs and must be
 built as root.  You will be warned if/when this happens.
 
 ADDING A NEW SUPPORTED BOARD
