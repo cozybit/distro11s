@@ -9,7 +9,6 @@
 # Short-Description:	simplified mesh network management
 ### END INIT INFO
 
-set -e
 
 . /lib/lsb/init-functions
 
@@ -28,11 +27,8 @@ case "$1" in
 
   stop)
 	log_daemon_msg "Stopping meshkitd"
-	if start-stop-daemon --stop --quiet --oknodo --exec /usr/local/bin/meshkitd; then
-	    log_end_msg 0
-	else
-	    log_end_msg 1
-	fi
+	killall meshkitd &> /dev/null
+	log_end_msg 0
 	;;
 
   restart)
