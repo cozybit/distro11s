@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CONF=/etc/meshkit/meshkit.conf
+CONF=/etc/meshkit/meshkit.default.conf
+[ -e /etc/meshkit/meshkit.conf ] && CONF=/etc/meshkit/meshkit.conf
 
 [ "${DEBUG}" = "" ] && DEBUG=0
 [ ${DEBUG} = 2 ] && set -x

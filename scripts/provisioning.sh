@@ -138,6 +138,20 @@ EOF
 		fi
    fi
 
+   # allow provision-time override of meshconf file
+   if [ "${DISTRO11S_MESHKIT_CONFIG}" != "" ]; then
+	   if [ ! -e ${DISTRO11S_MESHKIT_CONFIG} ]; then
+		   echo "meshkit config file ${DISTRO11S_MESHKIT_CONFIG} does not exist"
+		   exit 1
+	   fi
+	   sudo mkdir -p ${DRIVE}/etc/meshkit/
+	   sudo cp ${DISTRO11S_MESHKIT_CONFIG} ${DRIVE}/etc/meshkit/meshkit.conf
+	   if [ "${INSTALLER}" == "y" ]; then
+		   sudo mkdir -p ${DRIVE}/staging/etc/meshkit/
+		   sudo cp ${DISTRO11S_MESHKIT_CONFIG} ${DRIVE}/staging/etc/meshkit/meshkit.conf
+	   fi
+   fi
+
    echo "Unmounting ${DEV}1"
    sudo umount ${DEV}1
    sudo rm -rf ${DRIVE}
