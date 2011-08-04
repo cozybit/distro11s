@@ -4,24 +4,34 @@ PROVISIONING A ZOTAC
 The recommended way to bring up a Zotac board is to use the usb installer for
 distro11s.  Here's how:
 
-0. Prepare a config file.  Consider setting DISTRO11S_STATIC_IFACE and
+0. meshkit is the mesh network manager that runs by default on distro11s/zotac.
+   See board/zotac/overlay/etc/meshkit/meshkit.default.conf for the default
+   meshkit configuration, and packages/meshkit/meshkit.sample.conf for the
+   documentation of the meshkit config variables.  If you want to use a
+   different configuration than the one provided in
+   board/zotac/overlay/etc/meshkit/meshkit.default.conf, copy that file
+   somewhere (e.g., ./mymeshkit.conf) and alter it.
+
+1. Prepare a config file.  Consider setting DISTRO11S_STATIC_IFACE and
    DISTRO11S_HOSTNAME to personalized values to differentiate your zotac nodes
-   from those of your co-developers.  Alternatively, if you are using a binary
-   release and wish to use the default settings, set:
+   from those of your co-developers.  If you created a customized meshkit
+   config file in step 0, be sure to set DISTRO11S_MESHKIT_CONFIG to point to
+   the config file (e.g., $PWD/mymeshkit.conf).  Alternatively, if you are
+   using a binary release and wish to use the default settings, set:
 
    export DISTRO11S_CONF=$PWD/board/zotac/distro11s-release.conf
 
-1. Build distro11s for zotac as described in the top-level README.  However, if
+2. Build distro11s for zotac as described in the top-level README.  However, if
    you are using a binary release, you may skip this step.
 
-2. Create a distro11s provisioning USB drive as described in the top-level
+3. Create a distro11s provisioning USB drive as described in the top-level
    README:
 
    $ ./scripts/provisioning.sh -d /dev/sdX -i
 
    Naturally, you must change sdX to match your USB drive.
 
-3. Plug the provisioning USB drive into the zotac and boot it from USB.  To
+4. Plug the provisioning USB drive into the zotac and boot it from USB.  To
    achieve this, you must hit F11 at boot time and select the USB drive from
    the list of boot devices.  The provisioning process will happen
    automatically.  Unfortunately, there is no convenient way to know when the
@@ -30,5 +40,8 @@ distro11s.  Here's how:
    address.  Once this succeeds, you can expect that your zotac no longer needs
    its USB drive attached and that provisioning succeeded.
 
-4. You can now proceed to provision the next zotac.  It will have an
+5. You can now proceed to provision the next zotac.  It will have an
    incremented hostname (e.g., zotac-2) and IP address (e.g., 192.168.1.192).
+
+6. Expect the zotacs to all come up and form a mesh network as specified by
+   your meshkit config.
