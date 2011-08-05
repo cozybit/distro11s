@@ -8,12 +8,12 @@ file.  Here's the basic idea:
 A typical meshkit deploy has two interfaces.  Let's call them $MESH_IF and
 $INFRA_IF.  $MESH_IF is brought up as a mesh interface with the configured mesh
 ID, security, and IP address.  $INFRA_IF comes up as an access point with the
-configured SSID, security, and IP address.  $MESH_IF and $INFRA_IF are bridged
-such that a regular legacy client STA can associate with the AP running on
-$INFRA_IF and reach any node in the mesh.  Similarly, any node in the mesh can
-reach any client STA associated with the AP on $INFRA_IF.
+specified hostap configuration and IP address.  $MESH_IF and $INFRA_IF are
+bridged such that a regular legacy client STA can associate with the AP running
+on $INFRA_IF and reach any node in the mesh.  Similarly, any node in the mesh
+can reach any client STA associated with the AP on $INFRA_IF.
 
-If you want to user your mesh nodes as a mesh networking test bed, you need a
+If you want to use your mesh nodes as a mesh networking test bed, you need a
 stable control channel to your meshkit node.  Further, you want all meshkit
 nodes to be on the same control network so you can easily reach them.  The
 normal behavior doesn't quite work for this.  So you can set up the $CTL_IF.
@@ -22,16 +22,28 @@ Specifically, if $CTL_SSID is set, meshkit periodically scans for $CTL_SSID on
 $CTL_IF.  If/when it finds $CTL_SSID, it associates and assigns the specified
 IP.  If $CTL_SSID is not set, meshkit assumes that the interface is a regular
 ethernet interface and configures it accordingly.  As long as you know $CTL_IP,
-you can login to the meshkit node and play around.  Note that $CTL_IF and
-$INFRA_IF can be the same, but in this case the AP on $INFRA_IF will be brought
-down before it is brought up as the control interface.
+you can login to the meshkit node and play around.
+
+Note that $CTL_IF and $INFRA_IF can be the same.  In this case, we scan for
+$CTL_SSID at launch time.  If we find it, we join it.  Otherwise, we just
+launch the AP on $INFRA_IF as usual.  So if your meshkit configuration has
+$CTL_IF == $INFRA_IF, and you want to switch to the control network, set up
+control AP with $CTL_SSID and reboot the nodes.
 
 Configuring mesh node
 =====================
 
-The configuration file for meshkit lives in /etc/meshkit/meshkit.conf.  It
-contains a number of variables that control its behavior.  These variables are
-documented in ./meshkit.sample.conf and described above.
+The default configuration file for meshkit is
+/etc/meshkit/meshkit.default.conf.  The defaults are overridden if
+/etc/meshkit/meshkit.conf exists.  The config contains a number of variables
+that control meshkit's behavior.  These variables are documented in
+./meshkit.sample.conf and described above.
+
+The default AP configuration used by $INFRA_IF is
+/etc/meshkit/hostapd.default.conf.  The interface variable should either be set
+to the same value as $INFRA_IF.  Or, you can set it to the variable literally
+like so: 'interface=${INFRA_IF}' and meshkit will apply the meshkit.conf
+variables.
 
 Note that the presence of /etc/distro11s-hostnumber and /etc/distro11s.conf
 influence the configuration.  Specifically, if these two files are present,

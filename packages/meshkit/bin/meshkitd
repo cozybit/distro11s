@@ -17,7 +17,8 @@ function log {
 function die {
 	log ${*}
 	iw dev mesh0 del &> /dev/null
-	killall meshd-nl80211
+	killall meshd-nl80211 &> /dev/null
+	killall hostapd &> /dev/null
 	exit -1
 }
 
@@ -53,6 +54,7 @@ source ${CONF}
 # Calculate updated IP addresses if configured to do so
 REAL_MESH_IP=${MESH_IP}
 REAL_CTL_IP=${CTL_IP}
+REAL_INFRA_IP=${INFRA_IP}
 
 if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 	source /etc/distro11s.conf
@@ -64,8 +66,16 @@ if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 		if [ "${CTL_IP}" != "" ]; then
 			REAL_CTL_IP=`increment_ip ${CTL_IP} ${HOSTNUM}`
 		fi
+		if [ "${INFRA_IP}" != "" ]; then
+			REAL_INFRA_IP=`increment_ip ${INFRA_IP} ${HOSTNUM}`
+		fi
 	fi
 fi
+
+# start with a clean house
+ifconfig -a | grep mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
+killall meshd-nl80211 &> /dev/null
+killall hostapd &> /dev/null
 
 if [ "${MESH_IF}" != "" ]; then
 	[ "${MESH_CHANNEL}" = "" ] && MESH_CHANNEL=6
@@ -78,10 +88,9 @@ if [ "${MESH_IF}" != "" ]; then
 	MESHD_LOG=/var/log/authsae.${MESH_IF}.log
 	log -n "Starting mesh on ${MESH_IF}..."
 
-	# start with a clean house
-	ifconfig -a | grep mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
-	killall meshd-nl80211 &> /dev/null
-
+	# sigh.  sometimes when we restart meshkit MESH_IF doesn't appear unless we
+	# wait for it.  Not sure why.
+	sleep 1
 	ifconfig -a | grep ${MESH_IF} &> /dev/null || die "No such iface ${MESH_IF}"
 	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
 	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
@@ -124,6 +133,38 @@ EOF
 	# For now, we just support static IP
 	ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
 	log "Success"
+fi
+
+# If our INFRA and CTL interfaces are the same, we have to choose which one to
+# honor.  If we can't find the CTL network, do INFRA.  Otherwise to CTL.
+if [[ "${INFRA_IF}" != "" ]] && [[ "${CTL_IF}" != "" ]] && [[ "${INFRA_IF}" == "${CTL_IF}" ]]; then
+	log -n "Checking for control network ${CTL_SSID}..."
+	ifconfig ${CTL_IF} up || die "Failed to bring up control/infra interface"
+	iw dev ${CTL_IF} scan | grep -e '[[:space:]]*SSID: '${CTL_SSID}'$' &> /dev/null
+	if [ $? -eq 0 ]; then
+		log "Found it.  Joining control network."
+		INFRA_IF=""
+	else
+		log "Didn't find it.  Starting AP."
+		CTL_IF=""
+	fi
+fi
+
+if [ "${INFRA_IF}" != "" ]; then
+	ifconfig ${INFRA_IF} down || die "failed to bring down infra interface ${INFRA_IF}"
+
+	# prepare the config file
+	HOSTAP_CONF=/etc/meshkit/hostapd.default.conf
+	[ -e /etc/meshkit/hostapd.conf ] && HOSTAP_CONF=/etc/meshkit/hostapd.conf
+	[ -e ${HOSTAP_CONF} ] || die "${HOSTAP_CONF} file does not exist"
+	mkdir -p /var/run/hostapd/
+	rm -f /var/run/hostapd/hostapd.conf
+	while read l; do
+		L=`eval echo ${l}`
+		[ "${L}" != "" ] && echo ${L} >> /var/run/hostapd/hostapd.conf
+	done < ${HOSTAP_CONF}
+	hostapd -B /var/run/hostapd/hostapd.conf || die "Failed to launch hostapd"
+	ifconfig ${INFRA_IF} ${REAL_INFRA_IP} || die "Failed to set infra IP address"
 fi
 
 if [ "${CTL_IF}" != "" ]; then
