@@ -75,6 +75,8 @@ patch list since last rebase, maybe a few cherry-picked commits.
 Submitting Patches Upstream
 ===========================
 
+Release Maintainer:
+-------------------
 You'll need the following tools:
 	- sparse, a semantic parser for C
 	- a CC: script, comes in handy when you routinely CC the same people,
@@ -86,7 +88,8 @@ You'll need the following tools:
 
 Also, see 'man git-send-email' on how to configure git to send emails.
 
-0. Rebase your patches onto w-t HEAD and ensure the patches apply cleanly.
+0. Get the patches from distro11s/bleeding-edge. Rebase onto w-t HEAD and ensure
+   the patches apply cleanly.
 1. Create the patch files from your tree:
 	$ git format-patch patchset_start_sha~1...patchset_end_sha -o patch_dir/
 	- (maybe add a '--cover-letter' if you feel it is needed)
@@ -102,9 +105,24 @@ Also, see 'man git-send-email' on how to configure git to send emails.
 	- if this patchset is a resubmission, use '--in-reply-to=<reply-id>'.
 	- do a dry run:
 	$ git send-email --to=linux-wireless@vger.kernel.org --cc-cmd=./wt.cc --bcc=distro11s@cozybit.com patch_dir/* --dry-run
-	- use '--annotate' to edit each each patch. Comments and versioning info
-	  go after the first '---', as git won't include this in the commit log.
+	- use '--annotate' to edit each each patch. Put any versioning info
+	  after the first '---', as git won't include this in the commit log.
 	- If everything looks OK, repeat the above command without '--dry-run'
+
+Developer:
+----------
+
+If you've done some work on a patch and are resending, label it with a version
+number so the patch submitter can keep track of these.  Any versioning
+information goes after the 'Signed-off-by', with the following format:
+
+	vN:
+		- don't do foo (attribution)
+		- do bar (attribution)
+
+Once you're satisfied with your updated patch set, push your local branch to
+distro11s/bleeding-edge, be careful to handle any merge conflicts in your local
+branch as you'll be 'git push -f'ing!
 
 Release Day
 ===========
