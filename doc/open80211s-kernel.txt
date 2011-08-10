@@ -46,104 +46,50 @@ o11s.  Read on for more details on how this works.
 Fetching Patches
 ================
 
-You need a way to fetch raw patches submitted by developers.  There are a few
-ways to do this.  I use distro11s/hosttools/getpatch.py to pull them from my
-email account.  Anyway, before you can properly manage distro11s using the
-techniques described here, you should have a favorite way of fetching patches.
+You need a way to fetch raw patches submitted by developers.  Developers will
+keep their work in branch bleeding-edge of github.com:cozybit/open80211s.git
+From time to time developers will ask the maintainer to pull from bleeding-edge
+onto distro11s-devel.  
 
-The development cycle
-=====================
+The branches
+===========
 
-0. It's Monday.  The top of a development cycle.  You, the distro11s
-   maintainer, are preparing the next release of distro11s.  You start by
-   rebasing the open80211s tree's distro11s-dev branch to wireless testing
-   HEAD:
+github.com:cozybit/open80211s.git/distro11s-devel
+  - A patchset currently being tested that will be sent upstream once basic
+    smoke tests pass.  Patches in this branch should be "upstreamable" (correct
+    sign-off, format, checkpatch tested, etc.).
+
+github.com:cozybit/open80211s.git/master
+  - A pristine clone of wireless-testing whose head points to the w-t commit on
+    which the development branch is based.
+
+github.com:cozybit/open80211s.git/bleeding-edge
+  - Used by cozybit developers to exchange work-in-progress patches, etc.
+
+Any Day
+=======
+
+You, the distro11s maintainer, are asked to pull from bleeding-edge.  Maybe the
+patch list since last rebase, maybe a few cherry-picked commits.
+
+Release Day
+===========
+
+You, the distro11s maintainer, are preparing the next release of distro11s.
+
+1. Start by rebasing the open80211s tree's distro11s-dev branch to wireless
+   testing HEAD:
 
    $ cd $DITRO11S_SRC/kernel/
    $ git fetch wt master:wt
    $ git rebase wt distro11s-dev
    [ resolve any conflicts ]
 
+2. Build and run smoke tests on the release candidate.  If all looks good, you
+   submit the patches to the wireless-testing mailing list.
 
-1. Bob is a open80211s developer.  Last week he submitted a patchset containing
-   3 patches that support the "next big thing" (nbt) and submits them to
-   linux-wireless mailing list.  He expects these patches to go in the next
-   distro11s release, so he --bcc's distro11s@cozybit.com.
-   
-   
-2. There are two different process to get andapply Bob's patches:
+3. Once/if the release candidate is good, you tag it as release X.Y.Z and
+   inform the open80211s mailing list.
 
-   2.1 MAILINGN LIST
-   -----------------
-
-   You fetch these patches into your kernel directory.  Let's call the patches 1.patch,
-   2.patch, and 3.patch.
-
-   Apply Bob's patches:
-
-   $ git am 1.patch 2.patch 3.patch
-
-   You might get some conflicts here depending on what has happend in the
-   wireless testing tree.  If this happens, you can either resolve the
-   conflicts yourself, or ask Bob to rebase his patches to wireless-testing
-   HEAD and resubmit to distro11s@cozybit.com.
-
-   This approach is very useful if Bob is a developer located somewhere in the universe
-
-   2.2 FETCHING THE DEVELOPER's PATCH BRANCH
-   -----------------------------------------
-
-   In this approach, Bob has two different branches available in his working directory:
-
-     - Development branch: this is the branch where Bob uses to do all the
-       magic in form of patches.
-
-     - Patch branch: in this branch, Bob applies all the patches he wrote, but
-       only after submitting them to distro11s/wireless-testing. 
-       
-       Also, Bob makes sure that this branch is syncronized with the wireless
-       testing branch and his patches can be applied without any issues. He is
-       responsable to rebase it.
-       
-       The name of this branch is up to the developer, but it's recommended to
-       use the convention <developername>-patches.
-
-   The release manager has to fetch Bob's Patch branch in order to get the last
-   version of all the patches that bob submitted. The process is this:
-    
-   $ git remote bob ssh://<usename>@<hostname/IP>/path/to/the/git/repo
-   $ git fetch bob bob-patches:bob-patches
-   $ git log
-   Check the commit ids of Bob's patches on top of the last WT commit
-   $ git cherrypick <commitid>
-
-   This approach is very useful if the developers are in close communication
-   with the release manager, both make sure that the patch branch is updated
-
- 
-3. Repeat the step 1-2 for Alice's patches and the patches from any other
-   developers.
-
-4. Push to o11s:
-
-   $ git push o11s +distro11s-dev:distro11s-dev
-
-   This forces the distro11s-dev remote branch to look just like yours.
-
-5. Okay.  It's Friday.  Spin and test the release.  After you are happy with
-   the release, you must make tag the tree.
-
-   TODO: This should be handled automatically by the release script somehow
-
-6. It's Monday again.  Since the last week, Alice's patches were accepted
-   upstream.  Bob's patches sustained some comments and he submitted some V2
-   patches that have not been accepted yet.  Repeat step 0 above.  This time,
-   Alice's patches should be swallowed up in the mainline by the rebase.  Bob's
-   V1 patches will remain at the top of the distro11s-dev branch.
-
-7. Fetch Bob's V2 patch set (from the mailing list or from bob's patch branch)
-   and use your git skills to replace Bob's V1 patches with his V2 patches.  I
-   like git rebase -i to eliminate Bob's V1 patches and just git am to apply his
-   V2 patches.  After this step, push to o11s as in step 4.
-
-8. Repeat steps 1-5 to capture any new developments and spin the next release.
+4. Also inform developers that the release is good and ask them to rebase the
+   bleeding-edge branch to distro11s-dev
