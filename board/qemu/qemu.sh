@@ -14,7 +14,7 @@ sudo /sbin/ifconfig ${IFNAME} ${DISTRO11S_HOST_IP} up || die 1
 
 KERNEL=${DISTRO11S_OUT}/qemu/bzImage
 ROOTFS=${DISTRO11S_OUT}/qemu/rootfs.ext3
-qemu-system-`uname -m` -kernel ${KERNEL} -hda ${ROOTFS} \
+qemu -kernel ${KERNEL} -hda ${ROOTFS} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
 	-nographic -net nic,model=e1000 -net tap,ifname=${IFNAME},script=no \
 	-gdb tcp::1234 \
