@@ -72,6 +72,41 @@ Any Day
 You, the distro11s maintainer, are asked to pull from bleeding-edge.  Maybe the
 patch list since last rebase, maybe a few cherry-picked commits.
 
+Submitting Patches Upstream
+===========================
+
+You'll need the following tools:
+	- sparse, a semantic parser for C
+	- a CC: script, comes in handy when you routinely CC the same people,
+	  this will save you some typos. Here is the one I use for w-t submissions:
+	  $ cat wt.cc
+	  #!/bin/bash
+	  echo "johannes@sipsolutions.net"
+	  echo "linville@tuxdriver.com"
+
+Also, see 'man git-send-email' on how to configure git to send emails.
+
+0. Rebase your patches onto w-t HEAD and ensure the patches apply cleanly.
+1. Create the patch files from your tree:
+	$ git format-patch patchset_start_sha~1...patchset_end_sha -o patch_dir/
+	- (maybe add a '--cover-letter' if you feel it is needed)
+
+2. Perform the following checks:
+	- 'make C=2 M=net/mac80211' gives no warnings.
+	- './scripts/checkpatch.pl patch_dir/*' ditto.
+	- clean compile with and without CONFIG_MAC80211_MESH enabled
+	- tests pass.
+	- 'Signed-off by's are present.
+	- It's not after 5PM.
+
+3. Submit:
+	- if this patchset is a resubmission, use '--in-reply-to=<reply-id>'.
+	- do a dry run:
+	$ git send-email --to=linux-wireless@vger.kernel.org --cc-cmd=./wt.cc --bcc=distro11s@cozybit.com patch_dir/* --dry-run
+	- use '--annotate' to edit each each patch. Comments and versioning info
+	  go after the first '---', as git won't include this in the commit log.
+	- If everything looks OK, repeat the above command without '--dry-run'
+
 Release Day
 ===========
 
