@@ -92,11 +92,10 @@ Also, see 'man git-send-email' on how to configure git to send emails.
 	- (maybe add a '--cover-letter' if you feel it is needed)
 
 2. Perform the following checks:
-	- 'make C=2 M=net/mac80211' gives no warnings.
+	- 'make M=net/mac80211 C=2 CHECKFLAGS=-D__CHECK_ENDIAN__' gives no warnings
 	- './scripts/checkpatch.pl patch_dir/*' ditto.
 	- clean compile with and without CONFIG_MAC80211_MESH enabled
 	- tests pass.
-	- 'Signed-off by's are present.
 	- It's not after 5PM.
 
 3. Submit:
