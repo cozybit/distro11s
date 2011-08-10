@@ -6,7 +6,7 @@ function print_help {
 	echo "$(cat <<EOF
 fetch.sh: fetch distro11s source code
 
-Fetch each source package as specified in the specified board's pkglist.  Then
+Fetch each source package as specified in the specified board\'s pkglist.  Then
 source trees will end up in the specified src dir.  If a src package already
 exists, it is updated.
 
