@@ -178,6 +178,10 @@ TIPS AND TRICKS
    your config file, then you can say something like:
 
    ./scripts/foreach.sh './scripts/push.sh -u root@$HOSTNAME.local'
+   
+   or
+    
+   ./scripts/foreach.sh 'ssh root@${HOSTNAME}.local "<any_command>"'
 
    Your little bit in single quotes will get executed once for each node.  The
    vars that are set by the foreach.sh script (currently) include:
