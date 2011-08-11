@@ -54,4 +54,5 @@ fi
 # NB: trailing slash is important!
 SRC=${STAGING}/
 DEST=${U}:${DESTINATION}
-rsync --exclude='*root/.ssh/*' --exclude='/root/' -av ${SRC} ${DEST} || exit 1
+echo "About to push ${SRC} to ${DEST}"
+sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync --exclude='*root/.ssh/*' -av ${SRC} ${DEST} || exit 1
