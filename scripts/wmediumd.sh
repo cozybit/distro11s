@@ -7,3 +7,4 @@ export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
 export SUBDIRS="rawsocket wmediumd"
 do_stamp_cmd wmediumd.make make
 do_stamp_cmd wmediumd.install cp ./wmediumd/wmediumd ${STAGING}/usr/local/bin
+do_stamp_cmd wmediumd.files cp ./wmediumd/config/* ${STAGING}/usr/local/share/wmediumd/
