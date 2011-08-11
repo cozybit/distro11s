@@ -51,6 +51,11 @@ if [ "${U}" = "" ]; then
 	exit 1
 fi
 
+if [[ "${U}" == *@`hostname`* ]]; then
+	echo "Pushing to yourself, don't think you want to do this!"
+	exit 1
+fi
+
 # NB: trailing slash is important!
 SRC=${STAGING}/
 DEST=${U}:${DESTINATION}
