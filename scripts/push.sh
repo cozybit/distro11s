@@ -4,7 +4,8 @@ source `dirname $0`/common.sh
 
 DESTINATION="/"
 # HOSTNAME set by foreach.sh
-U=root@$HOSTNAME.local
+# don't push to ourselves
+[ $HOSTNAME != `hostname` ] && U=root@$HOSTNAME.local
 
 function print_help {
 	echo "$(cat <<EOF
@@ -53,5 +54,4 @@ fi
 # NB: trailing slash is important!
 SRC=${STAGING}/
 DEST=${U}:${DESTINATION}
-root_check "About to push ${SRC} to ${DEST}"
-sudo rsync --exclude='*root/.ssh/*' -av ${SRC} ${DEST} || exit 1
+rsync --exclude='*root/.ssh/*' --exclude='/root/' -av ${SRC} ${DEST} || exit 1
