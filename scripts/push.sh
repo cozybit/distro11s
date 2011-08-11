@@ -3,6 +3,8 @@
 source `dirname $0`/common.sh
 
 DESTINATION="/"
+# HOSTNAME set by foreach.sh
+U=root@$HOSTNAME.local
 
 function print_help {
 	echo "$(cat <<EOF
