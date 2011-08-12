@@ -1,5 +1,5 @@
 debian-rootfs;;;
-kernel;git;git@github.com:cozybit/open80211s;bleeding-edge
+kernel;git;git@github.com:cozybit/open80211s;distro11s-dev
 qemu-cleanups;;;
 zotac-cleanups;;;
 libnl;git;git://git.kernel.org/pub/scm/libs/netlink/libnl.git;master
