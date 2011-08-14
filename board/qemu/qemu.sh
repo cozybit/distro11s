@@ -26,7 +26,7 @@ ${QEMU} -kernel ${KERNEL} -hda ${ROOTFS} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
 	-nographic -net nic,model=e1000 -net tap,ifname=${IFNAME},script=no \
 	-gdb tcp::1234 \
-	-enable-kvm
+	-enable-kvm -smp 2
 
 # qemu will block here until it is done.  When it returns, we'll eliminate the
 # tap iface.
