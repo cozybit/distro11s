@@ -17,6 +17,10 @@ function log {
 function die {
 	log ${*}
 	iw dev mesh0 del &> /dev/null
+	if [ "`ifconfig | grep br0`" != "" ]; then
+		ifconfig br0 down &> /dev/null
+		brctl delbr br0 &> /dev/null
+	fi
 	killall meshd-nl80211 &> /dev/null
 	killall hostapd &> /dev/null
 	exit -1
@@ -54,7 +58,6 @@ source ${CONF}
 # Calculate updated IP addresses if configured to do so
 REAL_MESH_IP=${MESH_IP}
 REAL_CTL_IP=${CTL_IP}
-REAL_INFRA_IP=${INFRA_IP}
 
 if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 	source /etc/distro11s.conf
@@ -65,9 +68,6 @@ if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 		fi
 		if [ "${CTL_IP}" != "" ]; then
 			REAL_CTL_IP=`increment_ip ${CTL_IP} ${HOSTNUM}`
-		fi
-		if [ "${INFRA_IP}" != "" ]; then
-			REAL_INFRA_IP=`increment_ip ${INFRA_IP} ${HOSTNUM}`
 		fi
 	fi
 fi
@@ -164,7 +164,14 @@ if [ "${INFRA_IF}" != "" ]; then
 		[ "${L}" != "" ] && echo ${L} >> /var/run/hostapd/hostapd.conf
 	done < ${HOSTAP_CONF}
 	hostapd -B /var/run/hostapd/hostapd.conf || die "Failed to launch hostapd"
-	ifconfig ${INFRA_IF} ${REAL_INFRA_IP} || die "Failed to set infra IP address"
+
+	log "Bridging mesh0 and wlan1 interfaces."
+	brctl addbr br0 || die "Failed to create the brigde interface br0"
+	brctl addif br0 mesh0 || die "Failed to add mesh0 to the bridge interface"
+	ifconfig mesh0 0.0.0.0 || die "Failed to set an IP to mesh0"
+	brctl addif br0 wlan1 || die "Failed to add wlan1 to the bridge interface"
+	ifconfig wlan1 0.0.0.0 || die "Failed to set an IP to wlan1"
+	ifconfig br0 ${REAL_MESH_IP} up || die "Failed to set an IP address to the bridge interface"
 fi
 
 if [ "${CTL_IF}" != "" ]; then
@@ -213,7 +220,7 @@ if [ "${CTL_IF}" != "" ]; then
 			try ifconfig ${CTL_IF} ${REAL_CTL_IP} || continue
 		fi
 
-		# If we actually make it all the way to the end, we're connected.  Now
+		# If we actually make it all the way to the end, we\'re connected.  Now
 		# we poll to ensure that we stay connected.
 		while true; do
 			STATUS=`iw wlan1 link | head -1 | awk '{print $1}'`
