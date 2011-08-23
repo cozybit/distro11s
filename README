@@ -193,3 +193,6 @@ TIPS AND TRICKS
 
    HOSTNAME: The hostname of the node formed by adding his hostnumber to
    DISTRO11S_HOSTNAME.
+
+   Note: you can customize the range of nodes you would like to sync by setting
+   DISTRO11S_START_NODE and DISTRO11S_END_NODE in your distro11s.conf.
