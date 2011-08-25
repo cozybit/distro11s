@@ -18,11 +18,12 @@ function die {
 	log ${*}
 	iw dev mesh0 del &> /dev/null
 	if [ "`ifconfig | grep br0`" != "" ]; then
-		ifconfig br0 down &> /dev/null
+		ip link set dev br0 down &> /dev/null
 		brctl delbr br0 &> /dev/null
 	fi
 	killall meshd-nl80211 &> /dev/null
 	killall hostapd &> /dev/null
+	killall dhclient &> /dev/null
 	exit -1
 }
 
@@ -63,19 +64,20 @@ if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 	source /etc/distro11s.conf
 	if [ -e /etc/distro11s-hostnumber ]; then
 		HOSTNUM=`cat /etc/distro11s-hostnumber`
-		if [ "${MESH_IP}" != "" ]; then
+		if [ "${MESH_IP}" != "" -a "${MESH_IP}" != "auto" ]; then
 			REAL_MESH_IP=`increment_ip ${MESH_IP} ${HOSTNUM}`
 		fi
-		if [ "${CTL_IP}" != "" ]; then
+		if [ "${CTL_IP}" != "" -a "${CTL_IP}" != "auto" ]; then
 			REAL_CTL_IP=`increment_ip ${CTL_IP} ${HOSTNUM}`
 		fi
 	fi
 fi
 
 # start with a clean house
-ifconfig -a | grep mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
+ifconfig -a mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
 killall meshd-nl80211 &> /dev/null
 killall hostapd &> /dev/null
+killall dhclient &> /dev/null
 
 if [ "${MESH_IF}" != "" ]; then
 	[ "${MESH_CHANNEL}" = "" ] && MESH_CHANNEL=6
@@ -94,8 +96,7 @@ if [ "${MESH_IF}" != "" ]; then
 	ifconfig -a | grep ${MESH_IF} &> /dev/null || die "No such iface ${MESH_IF}"
 	iw dev ${MESH_IF} interface add mesh0 type mesh || die "Failed to add mesh interface"
 	iw dev mesh0 set channel ${MESH_CHANNEL} || die "Failed to change to mesh channel"
-	ifconfig mesh0 up || die "Failed to bring up mesh interface"
-
+	ip link set dev mesh0 up || die "Failed to bring up mesh interface"
 	if [ "${MESH_PASSWORD}" = "" ]; then
 		iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
 	else
@@ -127,11 +128,12 @@ authsae:
 };
 EOF
 )" > /var/run/authsae/authsae.conf
-		meshd-nl80211 -c /var/run/authsae/authsae.conf &> /var/log/authsae.log &
+		meshd-nl80211 -c /var/run/authsae/authsae.conf &
 		[ $? -eq 0 ] || die "Failed to launch meshd"
+		sleep 3
 	fi
-	# For now, we just support static IP
-	ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
+
+	[ "${MESH_IP}" != "auto" ] && ( ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface" )
 	log "Success"
 fi
 
@@ -139,7 +141,7 @@ fi
 # honor.  If we can't find the CTL network, do INFRA.  Otherwise to CTL.
 if [[ "${INFRA_IF}" != "" ]] && [[ "${CTL_IF}" != "" ]] && [[ "${INFRA_IF}" == "${CTL_IF}" ]]; then
 	log -n "Checking for control network ${CTL_SSID}..."
-	ifconfig ${CTL_IF} up || die "Failed to bring up control/infra interface"
+	ip link set dev ${CTL_IF} up || die "Failed to bring up control/infra interface"
 	iw dev ${CTL_IF} scan | grep -e '[[:space:]]*SSID: '${CTL_SSID}'$' &> /dev/null
 	if [ $? -eq 0 ]; then
 		log "Found it.  Joining control network."
@@ -151,7 +153,7 @@ if [[ "${INFRA_IF}" != "" ]] && [[ "${CTL_IF}" != "" ]] && [[ "${INFRA_IF}" == "
 fi
 
 if [ "${INFRA_IF}" != "" ]; then
-	ifconfig ${INFRA_IF} down || die "failed to bring down infra interface ${INFRA_IF}"
+	ip link set dev ${INFRA_IF} down || die "failed to bring down infra interface ${INFRA_IF}"
 
 	# prepare the config file
 	HOSTAP_CONF=/etc/meshkit/hostapd.default.conf
@@ -166,12 +168,26 @@ if [ "${INFRA_IF}" != "" ]; then
 	hostapd -B /var/run/hostapd/hostapd.conf || die "Failed to launch hostapd"
 
 	log "Bridging mesh0 and wlan1 interfaces."
+	ip addr flush dev mesh0 || die "Failed to flush the interface mesh0"
+	ip addr flush dev wlan1 || die "Failed to flush the interface wlan1"
 	brctl addbr br0 || die "Failed to create the brigde interface br0"
-	brctl addif br0 mesh0 || die "Failed to add mesh0 to the bridge interface"
-	ifconfig mesh0 0.0.0.0 || die "Failed to set an IP to mesh0"
-	brctl addif br0 wlan1 || die "Failed to add wlan1 to the bridge interface"
-	ifconfig wlan1 0.0.0.0 || die "Failed to set an IP to wlan1"
-	ifconfig br0 ${REAL_MESH_IP} up || die "Failed to set an IP address to the bridge interface"
+	brctl addif br0 mesh0 wlan1 || die "Failed to add mesh0 to the bridge interface"
+	ip link set dev br0 up
+	sleep 10
+	if [ "${MESH_IP}" == "auto" ]; then
+		log "Detecting peer mesh link"
+		while true; do
+			ISLINKED=`iw mesh0 station dump | grep -c ESTAB`
+			if [ "${ISLINKED}" != "0" ]; then
+				log "Launching dhcp client daemon"
+				dhclient -d -v br0 &> /var/log/dhcp.log &
+				break
+			fi
+			sleep 2
+		done
+	else
+		ifconfig br0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
+	fi
 fi
 
 if [ "${CTL_IF}" != "" ]; then
@@ -179,7 +195,7 @@ if [ "${CTL_IF}" != "" ]; then
 	ifconfig -a | grep ${CTL_IF} &> /dev/null || die "No such iface ${CTL_IF}"
 
 	# Try over and over to bring up the control interface.
-	ifconfig ${CTL_IF} down || die "Failed to bring down control iface"
+	ip link set dev ${CTL_IF} down || die "Failed to bring down control iface"
 
 	while true; do
 
@@ -212,9 +228,9 @@ if [ "${CTL_IF}" != "" ]; then
 		fi
 
 		# Set the IP address for the ctl interface
-		if [ "${REAL_CTL_IP}" = "" ]; then
-			log "DHCP unsupported at this time."
-			exit 1
+		if [ "${REAL_CTL_IP}" = "auto" ]; then
+			log "Getting an IP address from the DHCP server..."
+			dhclient -d -v ${CTL_IF} &> /var/log/dhcp.log &
 		else
 			log -n "Assigning IP address..."
 			try ifconfig ${CTL_IF} ${REAL_CTL_IP} || continue

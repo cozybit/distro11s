@@ -22,7 +22,8 @@ Specifically, if $CTL_SSID is set, meshkit periodically scans for $CTL_SSID on
 $CTL_IF.  If/when it finds $CTL_SSID, it associates and assigns the specified
 IP.  If $CTL_SSID is not set, meshkit assumes that the interface is a regular
 ethernet interface and configures it accordingly.  As long as you know $CTL_IP,
-you can login to the meshkit node and play around.
+you can login to the meshkit node and play around. If you enabled DHCP
+($CTL_IP=auto), you can reach the nodes using their hostname (mDNS).
 
 Note that $CTL_IF and $INFRA_IF can be the same.  In this case, we scan for
 $CTL_SSID at launch time.  If we find it, we join it.  Otherwise, we just
