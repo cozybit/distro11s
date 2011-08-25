@@ -116,6 +116,13 @@ function pkg_version {
 	fi
 }
 
+function add_text {
+        _TXT=${1}
+        _FILE=${2}
+        _CHECK=`grep "${_TXT}" ${_FILE}`
+        [ "${_CHECK}" == "" ] && echo -e "${_TXT}" >> ${_FILE}
+}
+
 # Now perform all of the common setup steps and variables used by just about
 # every script
 set_top || exit 1
