@@ -23,7 +23,7 @@ and applying a similar technique to the one described here.
 Setting up the tree
 ===================
 
-Development bound for distro11s happens on the distro11s-dev branch.  You, the
+Development bound for distro11s happens on the o11s-dev branch.  You, the
 distro11s maintainer, are the only one who messes with this branch.  Start by
 creating it:
 
@@ -31,49 +31,39 @@ creating it:
    $ git remote add wt git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git
    $ git fetch wt master:wt
    $ git remote add o11s git@github.com:cozybit/open80211s.git
-   $ git push o11s +wt:distro11s-dev
-   $ git fetch o11s distro11s-dev:distro11s-dev
+   $ git push o11s +wt:o11s-dev
+   $ git fetch o11s o11s-dev:o11s-dev
 
 Now, you must redirect distro11s to build the o11s tree instead of the upstream
 tree.  To do this, alter board/<board>/pkglist.  You probably have to rm -rf
 ${DISTRO11S_SRC}/kernel and run distro11s/scripts/fetch.sh to get the new
 kernel in place.  distro11s is not clever enough to just fetch a branch.
 
-Okay.  Now your working copy has a distro11s-dev branch.  You (the distro11s
-maintainer) will periodically rebase this branch to wt HEAD and push -f to
-o11s.  Read on for more details on how this works.
-
-Fetching Patches
-================
-
-You need a way to fetch raw patches submitted by developers.  Developers will
-keep their work in branch bleeding-edge of github.com:cozybit/open80211s.git
-From time to time developers will ask the maintainer to pull from bleeding-edge
-onto distro11s-devel.  
-
 The branches
-===========
-
-github.com:cozybit/open80211s.git/distro11s-devel
-  - A patchset currently being tested that will be sent upstream once basic
-    smoke tests pass.  Patches in this branch should be "upstreamable" (correct
-    sign-off, format, checkpatch tested, etc.).
+============
 
 github.com:cozybit/open80211s.git/master
-  - A pristine clone of wireless-testing whose head points to the w-t commit on
-    which the development branch is based.
+	tracks latest release of o11s-dev
+
+github.com:cozybit/open80211s.git/wt
+	tracks wireless-testing/master HEAD
+
+github.com:cozybit/open80211s.git/o11s-dev
+	Patches in this branch have been submitted upstream. Candidate for next
+	release.
 
 github.com:cozybit/open80211s.git/bleeding-edge
-  - Used by cozybit developers to exchange work-in-progress patches, etc.
+	A conglomoration of all feature branches, used by cozybit developers to
+	exchange work-in-progress patches, etc.
 
-Any Day
-=======
+github.com:cozybit/open80211s.git/<feature-branch-here>:
+	One of these per feature and/or patch set. Merged from wt on creation.
 
-You, the distro11s maintainer, are asked to pull from bleeding-edge.  Maybe the
-patch list since last rebase, maybe a few cherry-picked commits.
+Getting Patches Upstream
+========================
 
-Submitting Patches Upstream
-===========================
+Submitting:
+-----------
 
 Release Maintainer:
 -------------------
@@ -88,8 +78,7 @@ You'll need the following tools:
 
 Also, see 'man git-send-email' on how to configure git to send emails.
 
-0. Get the patches from distro11s/bleeding-edge. Rebase onto w-t HEAD and ensure
-   the patches apply cleanly.
+0. Rebase your feature branch onto wt, and ensure the patches apply cleanly.
 1. Create the patch files from your tree:
 	$ git format-patch patchset_start_sha~1...patchset_end_sha -o patch_dir/
 	- (maybe add a '--cover-letter' if you feel it is needed)
@@ -102,46 +91,58 @@ Also, see 'man git-send-email' on how to configure git to send emails.
 	- It's not after 5PM.
 
 3. Submit:
-	- if this patchset is a resubmission, use '--in-reply-to=<reply-id>'.
 	- do a dry run:
 	$ git send-email --to=linux-wireless@vger.kernel.org --cc-cmd=./wt.cc --bcc=distro11s@cozybit.com patch_dir/* --dry-run
-	- use '--annotate' to edit each each patch. Put any versioning info
-	  after the first '---', as git won't include this in the commit log.
+	- use '--annotate' to edit each each patch. If this is a resubmission,
+	  annotate the patch subject to look like [PATCH vN]. Put any versioning
+	  info after the first '---', so git won't include this in the upstream
+	  commit log.
 	- If everything looks OK, repeat the above command without '--dry-run'
 
-Developer:
-----------
+Revising:
+---------
 
-If you've done some work on a patch and are resending, label it with a version
-number so the patch submitter can keep track of these.  Any versioning
-information goes after the 'Signed-off-by', with the following format:
+The mailing list will invariably have comments on your patches, so don't be
+discouraged because your v1 didn't get in! All you have to do is:
+
+	1. Address the comments.
+	2. Once you think you've assembled enough comments and fixes to assemble
+	   a perfect vN+1, reply to the vN thread with a note saying vN+1 is
+	   coming.
+	3. 'push -f' your vN+1 into your feature branch, and see the Submitting
+	   section.
+	4. If patches are accepted, you're done, else goto 1.
+
+Maintain versioning info in the commit log, so the patch submitter can keep
+track of these.  Any versioning information goes after the 'Signed-off-by', with
+the following format:
 
 	vN:
 		- don't do foo (attribution)
 		- do bar (attribution)
 
-Once you're satisfied with your updated patch set, push your local branch to
-distro11s/bleeding-edge, be careful to handle any merge conflicts in your local
-branch as you'll be 'git push -f'ing!
+tip:
+	# to review your patchset and make sure no debugging cruft is left in:
+	$ git diff wt
+
+Any Day
+=======
+
+The release maintainer will notice a submission to the distro11s mailing list
+and take this as a cue to rebuild bleeding-edge and o11s-dev from the latest
+feature branches.
 
 Release Day
 ===========
 
-You, the distro11s maintainer, are preparing the next release of distro11s.
+You, the distro11s maintainer, are preparing the next release of open80211s
 
-1. Start by rebasing the open80211s tree's distro11s-dev branch to wireless
-   testing HEAD:
+Start by recreating bleeding-edge and o11s-dev:
 
-   $ cd $DITRO11S_SRC/kernel/
-   $ git fetch wt master:wt
-   $ git rebase wt distro11s-dev
-   [ resolve any conflicts ]
-
-2. Build and run smoke tests on the release candidate.  If all looks good, you
-   submit the patches to the wireless-testing mailing list.
-
-3. Once/if the release candidate is good, you tag it as release X.Y.Z and
-   inform the open80211s mailing list.
-
-4. Also inform developers that the release is good and ask them to rebase the
-   bleeding-edge branch to distro11s-dev
+	1. reset wt to wireless-testing/master
+	2. branch bleeding-edge and o11s-dev from wt.
+	3. pull the patch set from all feature branches onto bleeding-edge.
+	4. pull the patch sets which have been submitted upstream onto o11s-dev.
+	5. Build and run smoke tests on the new o11s-dev. If all looks good, create a
+	   new branch o11s-X.Y.Z, reset master to this, and inform the open80211s
+	   mailling list.
