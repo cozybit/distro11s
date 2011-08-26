@@ -82,7 +82,7 @@ if [ "${PACKAGE}" == "kernel" ]; then
 		sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync -av ${SRC}lib64/modules/ ${DEST}lib64/modules/ || exit 1
 	fi
 
-elif [ "${PACKAGE}" == "iw" || "${PACKAGE}" == "authsae" || "${PACKAGE}" == "libnl" || "${PACKAGE}" == "meshkit" || "${PACKAGE}" == "wmediumd" ]; then
+elif [ "${PACKAGE}" == "iw" -o "${PACKAGE}" == "authsae" -o "${PACKAGE}" == "libnl" -o "${PACKAGE}" == "meshkit" -o "${PACKAGE}" == "wmediumd" ]; then
 	echo "About to push ${PACKAGE}: From ${SRC}usr/local/ to ${DEST}usr/local/"
 	sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync -av ${SRC}usr/local/ ${DEST}usr/local/ || exit 1
 
@@ -92,7 +92,7 @@ elif [ "${PACKAGE}" == "iw" || "${PACKAGE}" == "authsae" || "${PACKAGE}" == "lib
 		sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync -av ${SRC}etc/wmediumd/ ${DEST}etc/wmediumd/ || exit 1
 	fi
 
-else
+elif [ "${PACKAGE}" != "all" ]; then
 	echo "Package not supported yet. Push all."
 	exit 1
 fi
