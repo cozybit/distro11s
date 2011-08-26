@@ -78,6 +78,7 @@ ifconfig -a mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
 killall meshd-nl80211 &> /dev/null
 killall hostapd &> /dev/null
 killall dhclient &> /dev/null
+rm -f /var/log/dhclient.log
 
 if [ "${MESH_IF}" != "" ]; then
 	[ "${MESH_CHANNEL}" = "" ] && MESH_CHANNEL=6
@@ -133,7 +134,13 @@ EOF
 		sleep 3
 	fi
 
-	[ "${MESH_IP}" != "auto" ] && ( ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface" )
+	if [ "${MESH_IP}" == "auto" ]; then
+		log "Launching dhcp client daemon"
+                dhclient -d -v mesh0 &> /var/log/dhcp.log &
+	else
+		ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
+	fi
+
 	log "Success"
 fi
 
@@ -166,7 +173,7 @@ if [ "${INFRA_IF}" != "" ]; then
 		[ "${L}" != "" ] && echo ${L} >> /var/run/hostapd/hostapd.conf
 	done < ${HOSTAP_CONF}
 	hostapd -B /var/run/hostapd/hostapd.conf || die "Failed to launch hostapd"
-
+	[ "${MESH_IP}" == "auto" ] && killall dhclient
 	log "Bridging mesh0 and wlan1 interfaces."
 	ip addr flush dev mesh0 || die "Failed to flush the interface mesh0"
 	ip addr flush dev wlan1 || die "Failed to flush the interface wlan1"
@@ -180,7 +187,7 @@ if [ "${INFRA_IF}" != "" ]; then
 			ISLINKED=`iw mesh0 station dump | grep -c ESTAB`
 			if [ "${ISLINKED}" != "0" ]; then
 				log "Launching dhcp client daemon"
-				dhclient -d -v br0 &> /var/log/dhcp.log &
+				dhclient -d -v br0 &> /var/log/dhclient.log &
 				break
 			fi
 			sleep 2
