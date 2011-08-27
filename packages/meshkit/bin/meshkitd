@@ -75,6 +75,7 @@ fi
 
 # start with a clean house
 ifconfig -a mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
+ifconfig -a br0 &> /dev/null && brctl delbr br0 &> /dev/null
 killall meshd-nl80211 &> /dev/null
 killall hostapd &> /dev/null
 killall dhclient &> /dev/null
@@ -136,7 +137,7 @@ EOF
 
 	if [ "${MESH_IP}" == "auto" ]; then
 		log "Launching dhcp client daemon"
-                dhclient -d -v mesh0 &> /var/log/dhcp.log &
+                dhclient -d -v mesh0 &> /var/log/dhclient.log &
 	else
 		ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
 	fi
@@ -179,6 +180,8 @@ if [ "${INFRA_IF}" != "" ]; then
 	ip addr flush dev wlan1 || die "Failed to flush the interface wlan1"
 	brctl addbr br0 || die "Failed to create the brigde interface br0"
 	brctl addif br0 mesh0 wlan1 || die "Failed to add mesh0 to the bridge interface"
+	MESH_MAC=`ifconfig mesh0 | grep HWaddr | awk '{print$5}'`
+	ip link set br0 address ${MESH_MAC}
 	ip link set dev br0 up
 	sleep 10
 	if [ "${MESH_IP}" == "auto" ]; then
@@ -237,7 +240,7 @@ if [ "${CTL_IF}" != "" ]; then
 		# Set the IP address for the ctl interface
 		if [ "${REAL_CTL_IP}" = "auto" ]; then
 			log "Getting an IP address from the DHCP server..."
-			dhclient -d -v ${CTL_IF} &> /var/log/dhcp.log &
+			dhclient -d -v ${CTL_IF} &> /var/log/dhclient.log &
 		else
 			log -n "Assigning IP address..."
 			try ifconfig ${CTL_IF} ${REAL_CTL_IP} || continue
