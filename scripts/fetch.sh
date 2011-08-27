@@ -40,7 +40,7 @@ for p in `cat ${PKGLIST}`; do
 
 	if [ -e  ${SRCDIR} ]; then
 		echo "UPDATING: ${SRCDIR}"
-		update ${VCS} ${SRCDIR} ${URL} ${BRANCH} || exit 1
+		update ${VCS} ${SRCDIR} ${NAME} || exit 1
 	else
 		echo "FETCHING: ${NAME}"
 		fetch ${VCS} ${NAME} ${URL} ${BRANCH} || exit 1
@@ -54,6 +54,8 @@ for p in `cat ${PKGLIST}`; do
 			git am ${TOP}/board/${DISTRO11S_BOARD}/patches/${NAME}/* || exit 1
 			Q popd
 		fi
+		# make sure package rebuilds if we blew away src dir to start from scratch
+		Q "rm ${TOP}/out/${DISTRO11S_BOARD}/stamps/${NAME}*"
 	fi
 done
 echo "all distro11s source packages fetched"

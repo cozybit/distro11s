@@ -42,17 +42,26 @@ function fetch {
 	fi
 }
 
-# update ${VCS} ${DIR}
+# update ${VCS} ${DIR} ${NAME}
 function update {
 	if [ ${1} = "git" ]; then
 		Q pushd ${2}
+		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 		git pull --rebase
+		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	elif [ ${1} = "svn" ]; then
 		Q pushd ${2}
+		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 		git svn rebase
+		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	else
 		echo "Unsupported version control system ${1}"
 		return 1
+	fi
+
+	if [ "${CURR_HEAD}" != "${NEW_HEAD}" ]; then
+		# we had updates, clear the stamps, ignore missing
+		Q "rm ${TOP}/out/${DISTRO11S_BOARD}/stamps/${3}*" || continue
 	fi
 }
 
@@ -63,6 +72,10 @@ function parse_pkg {
 	export URL=`echo ${*} | cut -d ';' -f 3`
 	export BRANCH=`echo ${*} | cut -d ';' -f 4`
 	export SRCDIR=${DISTRO11S_SRC}/${NAME}
+
+	if [ "${NAME}" = "" ]; then
+		echo "Need a package name!"; exit
+	fi
 }
 
 # do a command if the specified stamp file $1 does not exist.
