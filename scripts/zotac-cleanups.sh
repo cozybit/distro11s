@@ -34,4 +34,4 @@ add_text "kernel.core_pattern=/var/log/dumps/core_%e_%p_%t_%s" ${STAGING}/etc/sy
 
 # set regulatory domain
 echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
-echo "sed \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda > ${STAGING}/etc/default/crda" | sudo sh
+echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
