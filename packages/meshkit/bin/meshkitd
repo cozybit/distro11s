@@ -17,14 +17,18 @@ function log {
 
 function die {
 	log ${*}
-	iw dev mesh0 del &> /dev/null
-	if [ "`ifconfig | grep br0`" != "" ]; then
+	killall hostapd &> /dev/null
+	killall meshd-nl80211 &> /dev/null
+	killall dhclient &> /dev/null
+        if [ "`ifconfig -a | grep mesh0`" != "" ]; then
+		ip link set dev mesh0 down &> /dev/null
+		iw dev mesh0 del &> /dev/null
+        fi
+
+	if [ "`ifconfig -a | grep br0`" != "" ]; then
 		ip link set dev br0 down &> /dev/null
 		brctl delbr br0 &> /dev/null
 	fi
-	killall meshd-nl80211 &> /dev/null
-	killall hostapd &> /dev/null
-	killall dhclient &> /dev/null
 	exit -1
 }
 
@@ -91,11 +95,17 @@ if [ -e /etc/distro11s.conf -a -e /etc/distro11s-hostnumber ]; then
 fi
 
 # start with a clean house
-ifconfig -a mesh0 &> /dev/null && iw dev mesh0 del &> /dev/null
-ifconfig -a br0 &> /dev/null && brctl delbr br0 &> /dev/null
-killall meshd-nl80211 &> /dev/null
 killall hostapd &> /dev/null
+killall meshd-nl80211 &> /dev/null
 killall dhclient &> /dev/null
+if [ "`ifconfig -a | grep mesh0`" != "" ]; then
+	ip link set dev mesh0 down &> /dev/null
+	iw dev mesh0 del &> /dev/null
+fi
+if [ "`ifconfig -a | grep br0`" != "" ]; then
+	ip link set dev br0 down &> /dev/null
+	brctl delbr br0 &> /dev/null
+fi
 rm -f /var/log/dhclient.log
 
 if [ "${MESH_IF}" != "" ]; then
@@ -147,7 +157,7 @@ authsae:
 };
 EOF
 )" > /var/run/authsae/authsae.conf
-		meshd-nl80211 -c /var/run/authsae/authsae.conf &
+		meshd-nl80211 -c /var/run/authsae/authsae.conf &> /dev/null &
 		[ $? -eq 0 ] || die "Failed to launch meshd"
 		sleep 3
 	fi
