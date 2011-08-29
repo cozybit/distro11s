@@ -1,4 +1,5 @@
 #!/bin/bash
+ulimit -c 100000
 
 CONF=/etc/meshkit/meshkit.default.conf
 [ -e /etc/meshkit/meshkit.conf ] && CONF=/etc/meshkit/meshkit.conf
@@ -50,6 +51,22 @@ function increment_ip {
 	SUFFIX=$((`echo ${1} | cut -d '.' -f 4` + ${2}))
 	NEW_IP=`echo ${1} | cut -d '.' -f 1-3`".${SUFFIX}"
 	echo ${NEW_IP}
+}
+
+# bridge interfaces $2 and $3 in $1. The bride interface $1 will
+# use the MAC addres of $2
+function bridge_ifaces {
+	_BRIDGE_IF=${1}
+	_IF1=${2}
+	_IF2=${3}
+	log "Bridging ${_IF1} and ${_IF2} interfaces."
+	ip addr flush dev ${_IF1} || die "Failed to flush the interface ${_IF1}"
+	ip addr flush dev ${_IF2} || die "Failed to flush the interface ${_IF2}"
+	brctl addbr ${_BRIDGE_IF} || die "Failed to create the brigde interface ${_BRIDGE_IF}"
+	brctl addif ${_BRIDGE_IF} ${_IF1} ${_IF2} || die "Failed to add ${_IF1} and ${_IF2} to ${_BRIDGE_IF}"
+	_MAC=`ifconfig ${_IF1} | grep HWaddr | awk '{print$5}'`
+	ip link set ${_BRIDGE_IF} address ${_MAC} || die "Failed to set the MAC address of ${_IF1} to ${_BRIDGE_IF}"
+	ip link set dev ${_BRIDGE_IF} up
 }
 
 [ -e ${CONF} ] || die "Config file ${CONF} does not exist"
@@ -135,14 +152,16 @@ EOF
 		sleep 3
 	fi
 
-	if [ "${MESH_IP}" == "auto" ]; then
-		log "Launching dhcp client daemon"
-                dhclient -d -v mesh0 &> /var/log/dhclient.log &
-	else
-		ifconfig mesh0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
-	fi
+	log "Mesh deployed"
+fi
 
-	log "Success"
+# If the node is a MESH GATE, it will bridge mesh0 with eth0. If not, with wlan1
+if [ "${MESH_GATE}" == "yes" ]; then
+	BRGD_IF=eth0
+	iw mesh0 set mesh_param mesh_hwmp_rootmode=1
+	iw mesh0 set mesh_param mesh_gate_announcements=1
+else
+	BRGD_IF=wlan1
 fi
 
 # If our INFRA and CTL interfaces are the same, we have to choose which one to
@@ -163,26 +182,21 @@ fi
 if [ "${INFRA_IF}" != "" ]; then
 	ip link set dev ${INFRA_IF} down || die "failed to bring down infra interface ${INFRA_IF}"
 
-	# prepare the config file
-	HOSTAP_CONF=/etc/meshkit/hostapd.default.conf
-	[ -e /etc/meshkit/hostapd.conf ] && HOSTAP_CONF=/etc/meshkit/hostapd.conf
-	[ -e ${HOSTAP_CONF} ] || die "${HOSTAP_CONF} file does not exist"
-	mkdir -p /var/run/hostapd/
-	rm -f /var/run/hostapd/hostapd.conf
-	while read l; do
-		L=`eval echo ${l}`
-		[ "${L}" != "" ] && echo ${L} >> /var/run/hostapd/hostapd.conf
-	done < ${HOSTAP_CONF}
-	hostapd -B /var/run/hostapd/hostapd.conf || die "Failed to launch hostapd"
-	[ "${MESH_IP}" == "auto" ] && killall dhclient
-	log "Bridging mesh0 and wlan1 interfaces."
-	ip addr flush dev mesh0 || die "Failed to flush the interface mesh0"
-	ip addr flush dev wlan1 || die "Failed to flush the interface wlan1"
-	brctl addbr br0 || die "Failed to create the brigde interface br0"
-	brctl addif br0 mesh0 wlan1 || die "Failed to add mesh0 to the bridge interface"
-	MESH_MAC=`ifconfig mesh0 | grep HWaddr | awk '{print$5}'`
-	ip link set br0 address ${MESH_MAC}
-	ip link set dev br0 up
+	if [ "${MESH_GATE}" != "yes" ]; then
+		# prepare the config file
+		HOSTAP_CONF=/etc/meshkit/hostapd.default.conf
+		[ -e /etc/meshkit/hostapd.conf ] && HOSTAP_CONF=/etc/meshkit/hostapd.conf
+		[ -e ${HOSTAP_CONF} ] || die "${HOSTAP_CONF} file does not exist"
+		mkdir -p /var/run/hostapd/
+		rm -f /var/run/hostapd/hostapd.conf
+		while read l; do
+			L=`eval echo ${l}`
+			[ "${L}" != "" ] && echo ${L} >> /var/run/hostapd/hostapd.conf
+		done < ${HOSTAP_CONF}
+		hostapd -B /var/run/hostapd/hostapd.conf || die "Failed to launch hostapd"
+	fi
+
+	bridge_ifaces br0 mesh0 ${BRGD_IF}
 	sleep 10
 	if [ "${MESH_IP}" == "auto" ]; then
 		log "Detecting peer mesh link"
@@ -201,6 +215,19 @@ if [ "${INFRA_IF}" != "" ]; then
 fi
 
 if [ "${CTL_IF}" != "" ]; then
+
+	IFACE=mesh0
+	if [ "${MESH_GATE}" == "yes"  ]; then
+		bridge_ifaces br0 mesh0 ${BRGD_IF}
+		IFACE=br0
+	fi
+
+	if [ "${MESH_IP}" == "auto" ]; then
+		log "Launching dhcp client daemon"
+                dhclient -d -v ${IFACE} &> /var/log/dhclient.log &
+	else
+		ifconfig ${IFACE} ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
+	fi
 
 	ifconfig -a | grep ${CTL_IF} &> /dev/null || die "No such iface ${CTL_IF}"
 
