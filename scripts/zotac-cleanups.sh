@@ -31,3 +31,7 @@ sudo chown -R root.root ${STAGING}/var/log/dumps
 sudo chmod -R 1777 ${STAGING}/var/log/dumps
 add_text "#Core Files Destination: core_filename_pid_time_signal" ${STAGING}/etc/sysctl.conf
 add_text "kernel.core_pattern=/var/log/dumps/core_%e_%p_%t_%s" ${STAGING}/etc/sysctl.conf
+
+# set regulatory domain
+echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
+echo "sed \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda > ${STAGING}/etc/default/crda" | sudo sh
