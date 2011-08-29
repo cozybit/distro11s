@@ -32,6 +32,10 @@ function die {
 	exit -1
 }
 
+function shutdown {
+	die "Shutting down"
+}
+
 function try {
 	if [ ${DEBUG} -gt 0 ]; then
 		eval $*
@@ -72,6 +76,8 @@ function bridge_ifaces {
 	ip link set ${_BRIDGE_IF} address ${_MAC} || die "Failed to set the MAC address of ${_IF1} to ${_BRIDGE_IF}"
 	ip link set dev ${_BRIDGE_IF} up
 }
+
+trap 'shutdown' TERM
 
 [ -e ${CONF} ] || die "Config file ${CONF} does not exist"
 
@@ -222,6 +228,11 @@ if [ "${INFRA_IF}" != "" ]; then
 	else
 		ifconfig br0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
 	fi
+
+	#Wait until we die
+	while true; do
+		sleep 5
+	done
 fi
 
 if [ "${CTL_IF}" != "" ]; then
