@@ -20,7 +20,7 @@ sudo umount ${STAGING}/proc/
 #Enabling coredumps for meshtkid
 if [ "`grep ulimit ${STAGING}/usr/local/bin/meshkitd`" == "" ]; then
 	sed '/bash/ a\
-	ulimit -c 100000' ${STAGING}/usr/local/bin/meshkitd > /tmp/meshkitd
+ulimit -c 100000' ${STAGING}/usr/local/bin/meshkitd > /tmp/meshkitd
 	mv /tmp/meshkitd ${STAGING}/usr/local/bin/meshkitd
 	chmod 755 ${STAGING}/usr/local/bin/meshkitd
 fi
