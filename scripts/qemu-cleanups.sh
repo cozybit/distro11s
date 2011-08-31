@@ -30,6 +30,7 @@ sudo mv -f ${STAGING}/etc/inittab.new ${STAGING}/etc/inittab
 sed 's/^root:\*:\(.*\)$/root::\1/' < ${STAGING}/etc/shadow >  ${STAGING}/etc/shadow.new
 mv -f ${STAGING}/etc/shadow.new ${STAGING}/etc/shadow
 
+sudo chmod 777 -R ${STAGING}/root/
 # Set up the sshfs automount if specified
 if [ "${DISTRO11S_SSHFS_AUTOMOUNT_PATH}" != "" -a \
 	"${DISTRO11S_HOST_IP}" != ""  ]; then
@@ -67,6 +68,7 @@ if [ "${DISTRO11S_SSH_PUB_KEY}" != "" -a -e "${DISTRO11S_SSH_PUB_KEY}" ]; then
 		cat ${DISTRO11S_SSH_PUB_KEY} >> ${AUTH_KEYS} || exit 1
 	fi
 fi
+sudo chmod 760 -R ${STAGING}/root/
 
 # Fix up ssh directory permissions so that key authentication works
 if [ -d ${STAGING}/root ]; then
