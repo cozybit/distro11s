@@ -37,3 +37,8 @@ echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
 echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
 # CRDA debian package expects iw in /usr/sbin/...
 sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/usr/sbin/iw
+
+# Disable DNS lookup - Makes SSH login faster
+sudo chmod 666 ${STAGING}/etc/ssh/sshd_config
+add_text "UseDNS no" ${STAGING}/etc/ssh/sshd_config
+sudo chmod 644 ${STAGING}/etc/ssh/sshd_config
