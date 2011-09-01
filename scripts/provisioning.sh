@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 DRIVE=/mnt/distross
 USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-n <name>] [-v]"
 INSTALLER=n
@@ -126,11 +128,9 @@ EOF
 	   sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
 	   sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
 	   sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper || exit 1
-       rm  ${DRIVE}/
        
        #Removing meshkit service from the usb installer
        insserv -r ${DRIVE}/etc/init.d/meshkit || exit 1
-
    fi
 
    if [ "${HOSTNUM}" != "" ]; then
