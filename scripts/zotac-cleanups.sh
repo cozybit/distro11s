@@ -2,7 +2,7 @@
 source `dirname $0`/common.sh
 
 #Load ath9k module with nohwcrypt parametar at boot time
-add_text "options ath9k nohwcrypt=1" ${STAGING}/etc/modprobe.d/local
+add_text "options ath9k nohwcrypt=1" ${STAGING}/etc/modprobe.d/local.conf
 
 #Activate syntax highlightning
 echo "$(cat <<EOF
