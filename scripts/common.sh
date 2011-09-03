@@ -132,8 +132,8 @@ function pkg_version {
 function add_text {
         _TXT=${1}
         _FILE=${2}
-        _CHECK=`grep "${_TXT}" ${_FILE}`
-        [ "${_CHECK}" == "" ] && echo -e "${_TXT}" >> ${_FILE}
+	_CHECK=`sudo grep "${_TXT}" ${_FILE}`
+        [ "${_CHECK}" == "" ] && echo -e "echo \"${_TXT}\" >> ${_FILE}" | sudo sh
 }
 
 # Now perform all of the common setup steps and variables used by just about
