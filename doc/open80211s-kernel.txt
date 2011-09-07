@@ -145,4 +145,4 @@ Start by recreating bleeding-edge and o11s-dev:
 	4. pull the patch sets which have been submitted upstream onto o11s-dev.
 	5. Build and run smoke tests on the new o11s-dev. If all looks good, create a
 	   new branch o11s-X.Y.Z, reset master to this, and inform the open80211s
-	   mailling list.
+	   mailing list.
