@@ -59,6 +59,11 @@ github.com:cozybit/open80211s.git/bleeding-edge
 github.com:cozybit/open80211s.git/<feature-branch-here>:
 	One of these per feature and/or patch set. Merged from wt on creation.
 
+github.com:cozybit/open80211s.git/<developer-initials>-for-bleeding-edge:
+	Once developers believe a feature is good enough to be tested on real
+	hardware, they'll apply that feature's patches here.  The maintainer
+        will create the bleeding-edge branch from these.
+
 Getting Patches Upstream
 ========================
 
@@ -146,3 +151,43 @@ Start by recreating bleeding-edge and o11s-dev:
 	5. Build and run smoke tests on the new o11s-dev. If all looks good, create a
 	   new branch o11s-X.Y.Z, reset master to this, and inform the open80211s
 	   mailing list.
+
+Questions
+=========
+
+1. Where do patches that are "in-flight" to wireless-testing live?  
+
+Developer owns those patches until they are added to the "xy-for-bleeding-edge"
+branch.  After that, maintainer has to ensure that those patches don't get
+lost: i.e. they need to stay in bleeding-edge until they are accepted upstream.
+
+2. How do we isolate ourselves from wireless-testing breakage?
+
+Maintainer only rebases o11s-dev onto linus' latest rc. bleeding-edge is still
+rebased onto w-t HEAD.
+
+Lifecycle of a feature
+======================
+
+1. Developer creates a new branch (e.g. ft-cold-fusion) from wireless-testing
+HEAD and starts hacking away. From time to time the branch is pushed to github
+for backup.
+
+2. Developer tests the new feature in qemu (if possible).  Developer decides if
+feature can be submitted upstream (wireless-testing) now or after the feature has
+been integrated into bleeding-edge and tested on real hardware.  
+
+3. Once the developer believes a feature won't break functionality or the
+build, she pushes her feature branch to the common repo.
+
+4. Maintainer recreates bleeding-edge when requested by developers by branching
+from wireless-testing HEAD, rebasing the feature branches, and merging all the
+feature branches.
+
+5. After bleeding-edge has been tested: 
+    - Developer submits unsubmitted patches to wireless-testing, if any.
+    - Maintainer makes a release from bleeding-edge.
+
+6. If patches make it upstream, they will be removed from the feature branches
+when rebasing.
+
