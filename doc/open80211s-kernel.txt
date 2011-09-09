@@ -187,7 +187,9 @@ feature branches.
 5. Maintainer tests:
    - Compilation problems/warnings
    - sparse problems/warnings
-   - (Some) tests on qemu
+   - (Some) tests on qemu. At least:
+	- test-XXX-template.sh (open and secure)
+	- test-high-load-short.sh (open and secure)
    - smoke tests on real hardware
 
 6. After bleeding-edge has been tested: 
