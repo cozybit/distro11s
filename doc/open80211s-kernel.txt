@@ -191,3 +191,16 @@ feature branches.
 6. If patches make it upstream, they will be removed from the feature branches
 when rebasing.
 
+What this looks like:
+=====================
+                                                           branch:
+                                                           -------
+
+o - o - o ... o - o                                        w-t HEAD
+                   \---#---#---#---#                       ft-#
+                   \---@---@---@    \                      ft-@
+                   \---*---*    \    \                     ft-*
+                   |        \    \    \
+                   \---------*----@----#-->[TEST]->PASS    b-e
+                   ^                          |        \
+                    \------------------FAIL<-/          !  o11s-0.x.y
