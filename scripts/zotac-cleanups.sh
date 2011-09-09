@@ -5,11 +5,11 @@ source `dirname $0`/common.sh
 add_text "options ath9k nohwcrypt=1" ${STAGING}/etc/modprobe.d/local.conf
 
 #Activate syntax highlightning
-echo "$(cat <<EOF
-syntax on
-EOF
-)" > /tmp/vimrc
-sudo mv /tmp/vimrc ${STAGING}/root/.vimrc
+[ ! -e ${STAGING}/root/.vimrc ] || touch ${STAGING}/root/.vimrc
+add_text "syntax on" ${STAGING}/root/.vimrc
+
+#Make VIM the default editor
+add_text "export EDITOR=vim" ${STAGING}/root/.bashrc
 
 #Install & configure acpid to enable clean shutdown when pressing the power
 #button
@@ -39,6 +39,21 @@ echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/
 sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/usr/sbin/iw
 
 # Disable DNS lookup - Makes SSH login faster
-sudo chmod 666 ${STAGING}/etc/ssh/sshd_config
 add_text "UseDNS no" ${STAGING}/etc/ssh/sshd_config
-sudo chmod 644 ${STAGING}/etc/ssh/sshd_config
+
+# Add a script that logs memory stats
+sudo echo "$(cat <<EOF
+#!/bin/bash
+date
+ps -A --sort -rss -o comm,pmem | head -n 11
+EOF
+)" > /tmp/memstats
+sudo mv /tmp/memstats ${STAGING}/usr/local/bin/
+chmod +x ${STAGING}/usr/local/bin/memstats
+
+# Add some jobs to cron: memstats, logrotate, ..
+sudo chroot ${STAGING} crontab -l > /tmp/mycron
+add_text '*/20 * * * * /usr/local/bin/memstats >> /var/log/memstats.log' ${STAGING}/tmp/mycron
+add_text '* */1 * * * /usr/sbin/logrotate /etc/logrotate.conf' ${STAGING}/tmp/mycron
+sudo chroot ${STAGING} crontab /tmp/mycron
+sudo rm ${STAGING}/tmp/mycron

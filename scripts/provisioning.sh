@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 DRIVE=/mnt/distross
 USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-n <name>] [-v]"
 INSTALLER=n
