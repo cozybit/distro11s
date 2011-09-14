@@ -41,19 +41,11 @@ sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/usr/sbin/iw
 # Disable DNS lookup - Makes SSH login faster
 add_text "UseDNS no" ${STAGING}/etc/ssh/sshd_config
 
-# Add a script that logs memory stats
-sudo echo "$(cat <<EOF
-#!/bin/bash
-date
-ps -A --sort -rss -o comm,pmem | head -n 11
-EOF
-)" > /tmp/memstats
-sudo mv /tmp/memstats ${STAGING}/usr/local/bin/
-chmod +x ${STAGING}/usr/local/bin/memstats
-
 # Add some jobs to cron: memstats, logrotate, ..
-sudo chroot ${STAGING} crontab -l > /tmp/mycron
+sudo chroot ${STAGING} crontab -r
+sudo touch ${STAGING}/tmp/mycron
 add_text '*/20 * * * * /usr/local/bin/memstats >> /var/log/memstats.log' ${STAGING}/tmp/mycron
-add_text '* */1 * * * /usr/sbin/logrotate /etc/logrotate.conf' ${STAGING}/tmp/mycron
+add_text '*/20 * * * * /usr/local/bin/peerstats >> /var/log/peerstats.log' ${STAGING}/tmp/mycron
+add_text '1 */1 * * * /usr/sbin/logrotate /etc/logrotate.conf' ${STAGING}/tmp/mycron
 sudo chroot ${STAGING} crontab /tmp/mycron
 sudo rm ${STAGING}/tmp/mycron
