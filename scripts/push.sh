@@ -78,9 +78,6 @@ if [ "${PACKAGE}" == "kernel" ]; then
 	sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync -av ${SRC}boot/bzImage ${DEST}boot/bzImage || exit 1
 	echo "About to push the modules"
 	sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync -av ${SRC}lib/modules/ ${DEST}lib/modules/ || exit 1
-	if [ -d ${SRC}lib64/modules  ]; then
-		sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync -av ${SRC}lib64/modules/ ${DEST}lib64/modules/ || exit 1
-	fi
 
 elif [ "${PACKAGE}" == "iw" -o "${PACKAGE}" == "authsae" -o "${PACKAGE}" == "libnl" -o "${PACKAGE}" == "meshkit" -o "${PACKAGE}" == "wmediumd" ]; then
 	echo "About to push ${PACKAGE}: From ${SRC}usr/local/ to ${DEST}usr/local/"
