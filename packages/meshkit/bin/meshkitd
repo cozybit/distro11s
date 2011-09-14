@@ -223,7 +223,7 @@ if [ "${INFRA_IF}" != "" ]; then
 		log "Detecting peer mesh link"
 		while true; do
 			ISLINKED=`iw mesh0 station dump | grep -c ESTAB`
-			if [ "${ISLINKED}" != "0" ]; then
+			if [ "${ISLINKED}" != "0" -o "${MESH_GATE}" == "yes" ]; then
 				log "Launching dhcp client daemon"
 				dhclient -d -v br0 &> /var/log/dhclient.log &
 				break
