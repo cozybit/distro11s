@@ -1,0 +1,6 @@
+#!/bin/bash
+
+date
+echo "ESTAB PEERS:`/usr/local/sbin/iw mesh0 station dump | grep -c ESTAB`"
+echo "LISTEN PEERS:`/usr/local/sbin/iw mesh0 station dump | grep -c LISTEN`"
+/usr/local/sbin/iw mesh0 mpath dump

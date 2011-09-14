@@ -1,0 +1,111 @@
+#!/bin/bash
+
+USAGE="${0} [-a] [-i] [-k] [-p] [-c <command>] [-r <start>-<end>]"
+HOSTNAME=`hostname | awk -F'-' '{print$1}'`
+LOCAL=`hostname | awk -F'-' '{print$2}'`
+LOGOUTPUT=/root/net_test_logs
+TIME=604800 # 1 week
+
+IFACE=mesh0
+[ "`ifconfig -a | grep br0`" != "" ] && IFACE=br0
+LOCAL_IP=`ifconfig ${IFACE} | grep "inet addr" | awk '{print$2}' | awk -F ":" '{print$2}'`
+[ "${LOCAL_IP}" == "" ] && { echo "Problem getting the local IP of the mesh interface. Aborting"; exit 1; }
+
+while getopts "aikpc:r:h" options; do
+        case $options in
+                a ) COMMAND=abort_tests;;
+                i ) COMMAND=iperf;;
+		k ) COMMAND=install_keys;;
+		p ) COMMAND=ping;;
+		c ) COMMAND=command
+		    CMD=${OPTARG};;
+		r ) INIT=`echo ${OPTARG} | awk -F'-' '{print$1}'`
+		    END=`echo ${OPTARG} | awk -F'-' '{print$2}'`;;
+		h ) echo "Options:"
+		    echo "-a			Abort all the running tests (iperf, ping, etc)"
+		    echo "-i			Start iperf test"
+		    echo "-h			Show help"
+		    echo "-k			Install public key in the rest of the nodes"
+		    echo "-p			Start ping sweep test"
+		    echo "-c <command>		Execute the command <command> in the rest of the nodes"
+		    echo "-r <start>-<end>	Especify a range of nodes i.e.: -r 5-10"
+		    ;;
+                * ) echo ${USAGE}
+                    exit 0;;
+        esac
+done
+
+[ "${COMMAND}" == "" ] && { echo "Please, select an option to perform"; echo ${USAGE}; exit 1; }
+[ "${INIT}" == "" -o "${END}" == "" ] && { echo "Please, especify a range of nodes"; echo ${USAGE}; exit 1; }
+
+if [ "${COMMAND}" == "iperf" ]; then
+	
+        echo "Starting local iperf servers and remote clients!"
+	LOGOUTPUT=${LOGOUTPUT}/$(date +%F)/iperf
+	mkdir -p  ${LOGOUTPUT}
+	nohup iperf -s -i 10 -u &> ${LOGOUTPUT}/iperf_total.log &	
+
+	for num in `seq ${INIT} ${END}`; do
+		[ "${num}" == "${LOCAL}" ] && continue
+		node=${HOSTNAME}-${num}
+        	echo "Starting client on ${node}"
+                ssh ${USER}@${node}.local "nohup iperf -c ${LOCAL_IP} -t ${TIME} -i 10 -u &> iperf_client.log &" || { echo "Can't start the iperf client on node ${node}" >> ${LOGOUTPUT}/iperf_test.err; }
+        done
+
+	echo "iperf test started!"
+fi
+
+if [ "${COMMAND}" == "abort_tests" ]; then
+
+	echo "Aborting tests remotely"
+	for num in `seq ${INIT} ${END}`; do
+        	[ "${num}" == "${LOCAL}" ] && continue
+		node=${HOSTNAME}-${num}
+		echo "Killing iperf on ${node}"
+		ssh root@${node}.local 'killall iperf'
+        done
+
+	echo "Abort tests locally"
+	killall -s QUIT iperf &> /dev/null
+	killall -s TERM iperf &> /dev/null
+	killall -s QUIT ping &> /dev/null
+	killall -s TERM ping &> /dev/null
+fi
+
+if [ "${COMMAND}" == "ping" ]; then
+        echo "Starting pinging the rest of the nodes!"
+	LOGOUTPUT=${LOGOUTPUT}/$(date +%F)/ping
+	mkdir -p  ${LOGOUTPUT}
+	for num in `seq ${INIT} ${END}`; do
+                [ "${num}" == "${LOCAL}" ] && continue
+                node=${HOSTNAME}-${num}
+		echo "Pinging ${node}"
+		nohup ping -I ${IFACE} ${node}.local &> ${LOGOUTPUT}/ping-${node}.log &
+        done
+        echo "Ping sweep started!"
+fi
+
+if [ "${COMMAND}" == "install_keys" ]; then
+
+	[ ! -e ~/.ssh/id_rsa ] && { echo "Generating key..."; ssh-keygen -t rsa; }
+	rm -f install_keys.err
+	for num in `seq ${INIT} ${END}`; do
+		[ "${num}" == "${LOCAL}" ] && continue
+		node=${HOSTNAME}-${num}
+		echo "Installing key in ${node}"
+		ssh-copy-id -i ~/.ssh/id_rsa.pub ${USER}@${node}.local || { echo "Can't install keys on node ${node}" >> ${LOGOUTPUT}/install_keys.err; }
+        done
+	echo "Keys installed in all the nodes"
+fi
+
+if [ "${COMMAND}" == "command" ]; then
+
+	rm -f command_run.err &> /dev/null	
+	for num in `seq ${INIT} ${END}`; do
+		[ "${num}" == "${LOCAL}" ] && continue
+		node=${HOSTNAME}-${num}
+                echo "Executing command on client on ${node}"
+                ssh ${USER}@${node}.local "${CMD}" || { echo "Can't execute command on node ${node}" >> mkdir -p  ${LOGOUTPUT}/command_run.err; }
+        done
+	echo "Command ran in all the nodes"
+fi
