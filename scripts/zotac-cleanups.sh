@@ -35,8 +35,19 @@ add_text "kernel.core_pattern=/var/log/dumps/core_%e_%p_%t_%s" ${STAGING}/etc/sy
 # set regulatory domain
 echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
 echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
-# CRDA debian package expects iw in /usr/sbin/...
+# CRDA debian package expects iw in /usr/sbin/ and /sbin/
 sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/usr/sbin/iw
+sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/sbin/iw
+# udev rules don't work as expected. We use rc.local as a workaround to set the
+# regulatory domain
+echo "$(cat <<EOF
+#!/bin/sh -e
+export COUNTRY=00
+/sbin/crda
+exit 0
+EOF
+)" > /tmp/rc.local
+sudo mv /tmp/rc.local ${STAGING}/etc/
 
 # Disable DNS lookup - Makes SSH login faster
 add_text "UseDNS no" ${STAGING}/etc/ssh/sshd_config
