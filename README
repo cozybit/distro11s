@@ -154,6 +154,13 @@ TIPS AND TRICKS
 
    FORCE_BUILD=1 ./scripts/kernel.sh
 
+-- Copmile / test cycle in qemu:
+
+	1. make a change
+	2. rebuild your kernel, 'FORCE_BUILD=1 ./scripts/kernel.sh'
+	3. push your new modules to your running qemu, './scripts/push -u root@${DISTRO11S_HOST_IP}'
+	4. test.
+
 -- Avoid using sudo.  But if you must (e.g., mount, debootstrap, etc.), use the
    root_check function before invoking sudo.  This alerts the user.
 
