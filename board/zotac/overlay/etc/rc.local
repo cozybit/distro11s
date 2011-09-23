@@ -1,0 +1,9 @@
+#!/bin/sh -e
+# CRDA workaround
+export COUNTRY=US
+/sbin/crda
+
+# mount debugfs
+mount -t debugfs none /sys/kernel/debug
+
+exit 0
