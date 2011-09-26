@@ -6,7 +6,7 @@ fi
 
 function die {
 	sudo losetup -d ${LOOPDEV}
-	sudo umount /mnt
+	sudo umount ${MNTPOINT}
 	exit $1
 }
 
@@ -33,9 +33,10 @@ if [ ${SUCCESS} -eq 0 ]; then
 	echo "Failed to set up loop device"
 	exit 1
 fi
+MNTPOINT=`sudo mktemp -d --tmpdir=/mnt`
 sudo mkfs -t ext3 -m 1 -v ${LOOPDEV} || die 1
-sudo mount -o loop ${IMAGE} /mnt || die 1
-echo "Copying rootfs from ${STAGING}.  This may take a while...."
-sudo cp -ra ${STAGING}/* /mnt || die 1
+sudo mount -o loop ${IMAGE} ${MNTPOINT} || die 1
+echo "Copying rootfs from ${STAGING} to ${MNTPOINT}.  This may take a while...."
+sudo cp -ra ${STAGING}/* ${MNTPOINT} || die 1
 touch ${STAMPS}/make_ext3fs
 die 0
