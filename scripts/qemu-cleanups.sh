@@ -76,6 +76,7 @@ fi
 
 if [ -d ${STAGING}/root/.ssh ]; then
 	sudo chmod 700 ${STAGING}/root/.ssh
+	sudo chmod 600 ${STAGING}/root/.ssh/*
 fi
 
 touch ${STAMPS}/qemu-cleanups
