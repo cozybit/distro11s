@@ -49,7 +49,7 @@ log "Fetching the source for all the packages..."
 ./scripts/fetch.sh || die "Failed fetching the sources. Aborting"
 log "- SUCCEED"
 log "Creating a QEMU environment..."
-./scripts/build.sh || die "Failed building the packages. Aborting"
+yes | ./scripts/build.sh || die "Failed building the packages. Aborting"
 log "- SUCCEED"
 
 log "Launching qemu..."
