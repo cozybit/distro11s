@@ -61,8 +61,8 @@ while true; do
         sleep 1
 done
 
-log "Running the test-high-load-short"
-RESULTS=`ssh root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-high-load-short.sh"`
+log "Running test-XXX-template.sh"
+RESULTS=`ssh root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
 log "Halting QEMU"
 ssh root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
 
