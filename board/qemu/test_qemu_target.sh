@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script allows to test the process of creating a new QEMU target
+
 function die(){
         log ${*}
         exit -1
@@ -33,13 +35,12 @@ EOF
 
 }
 
-
-DISTRO11S_GIT=git@github.com:cozybit/distro11s.git
-TST_PATH=/tmp/test_distro11s
+DISTRO11S_GIT=git://github.com/cozybit/distro11s.git
+TST_PATH=/tmp/test_distro11s-$(date +%F_%H-%M)
 
 mkdir -p ${TST_PATH}
 cd ${TST_PATH}
-git clone ${DISTRO11S_GIT} distro11s
+git clone ${DISTRO11S_GIT} distro11s || die "Failed to clone the git repository. Aborting"
 cd distro11s
 
 generate_config
@@ -54,7 +55,6 @@ log "- SUCCEED"
 log "Launching qemu..."
 ./board/qemu/qemu.sh &> /dev/null &
 
-# Wait for qemu to boot
 log "Waiting for connectivity..."
 while true; do
         ping -c 1 192.168.55.2 && break
@@ -62,11 +62,19 @@ while true; do
 done
 
 log "Running test-XXX-template.sh"
-RESULTS=`ssh root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
-log "Halting QEMU"
-ssh root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
+OPEN=`ssh -o "StrictHostKeyChecking no" root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
 
 TEST=FAIL
 echo ${RESULTS} | grep PASS &>/dev/null && TEST=PASS
 
-log "QEMU Distro11s test: ${TEST}"
+log "Test for Open Mesh: ${TEST}"
+
+SECURE=`ssh -o "StrictHostKeyChecking no" root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh -s"`
+
+TEST=FAIL
+echo ${RESULTS} | grep PASS &>/dev/null && TEST=PASS
+
+log "Test for Secure Mesh: ${TEST}"
+
+log "Halting QEMU"
+ssh -o "StrictHostKeyChecking no" root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
