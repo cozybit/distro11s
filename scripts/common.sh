@@ -20,7 +20,7 @@ function set_top {
 	return 1
 }
 
-# fetch ${VCS} ${NAME} ${URL} ${BRANCH}
+# fetch ${VCS} ${NAME} ${URL} ${BRANCH} ${TAG}
 function fetch {
 	DEST=${DISTRO11S_SRC}/${NAME}
 	if [ ${1} = "git" ]; then
@@ -34,25 +34,27 @@ function fetch {
 		else
 			${GIT} ${3} -b ${4} ${DEST}
 		fi
+		[ "${5}" != "" ] && { pushd .; cd ${DEST}; git reset --hard ${5}; popd; }
 	elif [ ${1} = "svn" ]; then
 		git svn clone ${3} ${DEST}
+		#TODO: implement git reset --hard ${TAG} for git-svn
 	else
 		echo "Unsupported version control system ${1}"
 		return 1
 	fi
 }
 
-# update ${VCS} ${DIR} ${NAME}
+# update ${VCS} ${DIR} ${NAME} ${TAG}
 function update {
 	if [ ${1} = "git" ]; then
 		Q pushd ${2}
 		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
-		git pull --rebase
+		[ "${4}" == "" ] && git pull --rebase
 		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	elif [ ${1} = "svn" ]; then
 		Q pushd ${2}
 		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
-		git svn rebase
+		[ "${4}" == "" ] && git svn rebase
 		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	else
 		echo "Unsupported version control system ${1}"
@@ -71,8 +73,8 @@ function parse_pkg {
 	export VCS=`echo ${*} | cut -d ';' -f 2`
 	export URL=`echo ${*} | cut -d ';' -f 3`
 	export BRANCH=`echo ${*} | cut -d ';' -f 4`
+	export TAG=`echo ${*} | cut -d ';' -f 5`
 	export SRCDIR=${DISTRO11S_SRC}/${NAME}
-
 	if [ "${NAME}" = "" ]; then
 		echo "Need a package name!"; exit
 	fi
