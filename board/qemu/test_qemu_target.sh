@@ -62,19 +62,18 @@ while true; do
 done
 
 log "Running test-XXX-template.sh"
-OPEN=`ssh -o "StrictHostKeyChecking no" root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
-
-TEST=FAIL
-echo ${RESULTS} | grep PASS &>/dev/null && TEST=PASS
+OPEN=`ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
 
 log "Test for Open Mesh: ${TEST}"
-
-SECURE=`ssh -o "StrictHostKeyChecking no" root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh -s"`
-
 TEST=FAIL
-echo ${RESULTS} | grep PASS &>/dev/null && TEST=PASS
+echo ${OPEN} | grep PASS &>/dev/null && TEST=PASS
 
 log "Test for Secure Mesh: ${TEST}"
+SECURE=`ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh -s"`
+
+TEST=FAIL
+echo ${SECURE} | grep PASS &>/dev/null && TEST=PASS
+
 
 log "Halting QEMU"
-ssh -o "StrictHostKeyChecking no" root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
