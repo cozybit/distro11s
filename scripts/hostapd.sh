@@ -10,5 +10,5 @@ if [ ! -e ${CONFIG} ]; then
 	CONFIG=defconfig
 fi
 do_stamp_cmd hostapd.config cp ${CONFIG} ./.config && echo "CONFIG_LIBNL20=y" >> ./.config
-do_stamp_cmd hostapd.make PREFIX=${STAGING}/usr/local make -j ${DISTRO11S_JOBS}
+do_stamp_cmd hostapd.make make clean && PREFIX=${STAGING}/usr/local make -j ${DISTRO11S_JOBS}
 do_stamp_cmd hostapd.install DESTDIR=${STAGING} make install && cp hostapd.conf ${STAGING}/etc/
