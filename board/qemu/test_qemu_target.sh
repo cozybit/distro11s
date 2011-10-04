@@ -64,16 +64,15 @@ done
 log "Running test-XXX-template.sh"
 OPEN=`ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
 
-log "Test for Open Mesh: ${TEST}"
 TEST=FAIL
 echo ${OPEN} | grep PASS &>/dev/null && TEST=PASS
+log "Test for Open Mesh: ${TEST}"
 
-log "Test for Secure Mesh: ${TEST}"
 SECURE=`ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh -s"`
 
 TEST=FAIL
 echo ${SECURE} | grep PASS &>/dev/null && TEST=PASS
-
+log "Test for Secure Mesh: ${TEST}"
 
 log "Halting QEMU"
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
