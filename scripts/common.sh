@@ -70,6 +70,14 @@ function update {
 		# we had updates, clear the stamps, ignore missing
 		Q "rm ${TOP}/out/${DISTRO11S_BOARD}/stamps/${3}*" || continue
 	fi
+
+	if [ "${4}" != "" ]; then
+		Q pushd .
+		cd ${2}
+		git fetch
+		git checkout -q ${4}
+		Q popd
+	fi
 }
 
 # parse a pkglist line and set the relevant variables
