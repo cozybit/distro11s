@@ -8,6 +8,7 @@ function die(){
 }
 
 function log(){
+	echo ${*}
 	echo ${*} >> ${TST_PATH}/distro11s_test.log
 }
 
@@ -27,7 +28,7 @@ DISTRO11S_STATIC_NM=255.255.255.0
 DISTRO11S_AUTO_INCREMENT_INSTALLER=0
 DISTRO11S_SSHFS_AUTOMOUNT_USER=\${USER}
 DISTRO11S_SSHFS_AUTOMOUNT_PATH=/home/guillermo/Projects
-DISTRO11S_GIT_REFERENCE=\${PWD}/src
+DISTRO11S_GIT_REFERENCE=
 DISTRO11S_SSH_PUB_KEY=\${HOME}/.ssh/id_rsa.pub
 DISTRO11S_ROOT_PW='bilbao'
 EOF
@@ -39,27 +40,36 @@ DISTRO11S_GIT=git://github.com/cozybit/distro11s.git
 TST_PATH=/tmp/test_distro11s-$(date +%F_%H-%M)
 
 mkdir -p ${TST_PATH}
+
+QEMU_RUNNING=`ps aux | grep -c 'qemu/bzImage'`
+[ ${QEMU_RUNNING} -gt 1 ] && die "There is another instance of QEMU running! Please, halt it."
+
 cd ${TST_PATH}
-git clone ${DISTRO11S_GIT} distro11s || die "Failed to clone the git repository. Aborting"
+git clone ${DISTRO11S_GIT} distro11s || die "Failed to clone the git repository. Aborting."
 cd distro11s
 
 generate_config
 
 log "Fetching the source for all the packages..."
-./scripts/fetch.sh || die "Failed fetching the sources. Aborting"
+./scripts/fetch.sh || die "Failed fetching the sources. Aborting."
 log "- SUCCEED"
 log "Creating a QEMU environment..."
-yes | ./scripts/build.sh || die "Failed building the packages. Aborting"
+yes | ./scripts/build.sh || die "Failed building the packages. Aborting."
 log "- SUCCEED"
 
 log "Launching qemu..."
 ./board/qemu/qemu.sh &> /dev/null &
 
 log "Waiting for connectivity..."
+i=0
 while true; do
         ping -c 1 192.168.55.2 && break
+	[ ${i} -gt 120 ] && die "Failed trying to detect QEMU. Aborting."
         sleep 1
+	${i}=$(i+1)
 done
+# wait a bit more to make sure that sshd is running
+sleep 10
 
 log "Running test-XXX-template.sh"
 OPEN=`ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 "cd /usr/local/share/hwsim_tests/ && ./test-XXX-template.sh"`
@@ -75,4 +85,4 @@ echo ${SECURE} | grep PASS &>/dev/null && TEST=PASS
 log "Test for Secure Mesh: ${TEST}"
 
 log "Halting QEMU"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU"
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.55.2 halt &> /dev/null || die "Failed to halt QEMU. Aborting."
