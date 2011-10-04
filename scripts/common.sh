@@ -34,7 +34,12 @@ function fetch {
 		else
 			${GIT} ${3} -b ${4} ${DEST}
 		fi
-		[ "${5}" != "" ] && { pushd .; cd ${DEST}; git reset --hard ${5}; popd; }
+		if [ "${5}" != "" ] ; then
+			pushd .
+			cd ${DEST}
+			git reset --hard ${5}
+			popd
+		fi
 	elif [ ${1} = "svn" ]; then
 		git svn clone ${3} ${DEST}
 		#TODO: implement git reset --hard ${TAG} for git-svn
