@@ -57,15 +57,24 @@ function init(){
 
 	cd ${DISTRO11S_SRC}/kernel
 
+	echo "Getting an available branch in the repository"
+	#TODO: make this work when a branch has the * next to it
 	# Get the name of any branch available in the working directory 
 	AVAILABLE_BRANCH=`git branch | grep -m1 -v -e '-tmp' -e '-can' -e '*'`
 	
+	echo "Detecting the names of the repositories"
 	#Get the right name of the repos
 	O11S=$(get_repo_name ${O11S_URL})
 	WT=$(get_repo_name ${WT_URL})
 
+	[ "${O11S}" == "" ] && die "Failed to get open11s repository name."
+
 	#If WT repo does not exist, then add it and fetch the code
-	[ "${WT}" == "" ] && git remote add ${WT_URL}
+	if [ "${WT}" == "" ]; then
+		echo "WT repository not found. Adding it..."
+		WT=wt-auto
+		git remote add ${WT} ${WT_URL} || die "Failed to add WT as remote repository."
+	fi
 
 	git fetch ${O11S} || die "Failed to fetch ${O11S}."
 	git fetch ${WT} || die "Failed to fetch ${WT}."
@@ -78,7 +87,7 @@ function init(){
 function get_repo_name() {
 
 	_REPO_URL=${1}	
-	_ALL_REPOS=`git remote show`
+	_ALL_REPOS=`git remote show` || die "Failed to get a list of all the remote repos avaiable."
 
 	for repo in ${_ALL_REPOS}; do
 		_MATCH=`git remote show ${repo} | grep "Fetch URL" | grep ${_REPO_URL}`
@@ -241,8 +250,6 @@ done
 
 QEMU_RUNNING=`ps aux | grep -c 'qemu/bzImage'`
 [ "${TEST}" == "y" -a  ${QEMU_RUNNING} -gt 1 ] && die "There is another instance of QEMU running! Please, halt it."
-
-#TODO: make sure that after there is no another instance of QEMU running
 
 init
 
