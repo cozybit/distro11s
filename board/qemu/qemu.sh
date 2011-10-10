@@ -1,9 +1,12 @@
 #! /bin/bash
 source `dirname $0`/../../scripts/common.sh
 
+[ "${DISTRO11S_BOARD}" != "qemu" ] && \
+	{ echo "The used config file is not valid for a qemu target. Change it or use \"export DISTRO11S_CONFIG=/path/to/qemu/config/\""; exit 1; }
+
 root_check "This script creates tap interfaces"
 
-IFNAME=`sudo tunctl -u $USER -b`
+IFNAME=`sudo tunctl -u ${USER} -b`
 
 function die {
 	sudo tunctl -d ${IFNAME}
