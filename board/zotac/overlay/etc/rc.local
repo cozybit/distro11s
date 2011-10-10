@@ -6,4 +6,8 @@ export COUNTRY=US
 # mount debugfs
 mount -t debugfs none /sys/kernel/debug
 
+# update links and cache to the
+# available shared libraries
+ldconfig
+
 exit 0
