@@ -43,9 +43,7 @@ source `dirname $0`/common.sh
 
 # Global variables
 O11S_URL=git@github.com:cozybit/open80211s
-#WT_URL=git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git
-WT_URL=git://git.infradead.org/users/linville/wireless-testing.git
-
+WT_URL=git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-testing.git
 
 function die(){
 	echo $*
@@ -57,12 +55,12 @@ function init(){
 
 	cd ${DISTRO11S_SRC}/kernel
 
-	echo "Getting an available branch in the repository"
+	echo "-- Getting an available branch in the repository"
 	#TODO: make this work when a branch has the * next to it
 	# Get the name of any branch available in the working directory 
 	AVAILABLE_BRANCH=`git branch | grep -m1 -v -e '-tmp' -e '-can' -e '*'`
 	
-	echo "Detecting the names of the repositories"
+	echo "-- Detecting the names of the repositories"
 	#Get the right name of the repos
 	O11S=$(get_repo_name ${O11S_URL})
 	WT=$(get_repo_name ${WT_URL})
@@ -71,12 +69,14 @@ function init(){
 
 	#If WT repo does not exist, then add it and fetch the code
 	if [ "${WT}" == "" ]; then
-		echo "WT repository not found. Adding it..."
+		echo "-- WT repository not found. Adding it..."
 		WT=wt-auto
 		git remote add ${WT} ${WT_URL} || die "Failed to add WT as remote repository."
 	fi
 
+	echo "-- Fecthing from ${O11S}"
 	git fetch ${O11S} || die "Failed to fetch ${O11S}."
+	echo "-- Fecthing from ${WT}"
 	git fetch ${WT} || die "Failed to fetch ${WT}."
 }
 
@@ -90,7 +90,7 @@ function get_repo_name() {
 	_ALL_REPOS=`git remote show` || die "Failed to get a list of all the remote repos avaiable."
 
 	for repo in ${_ALL_REPOS}; do
-		_MATCH=`git remote show ${repo} | grep "Fetch URL" | grep ${_REPO_URL}`
+		_MATCH=`git remote show ${repo} | grep "Fetch URL" | grep -e ${_REPO_URL}`
 		[ "${_MATCH}" != "" ] && { echo ${repo}; break; }
 	done
 }
@@ -110,9 +110,11 @@ function rebase-ft(){
 	_STMP_FILE=rebase-ft-${_SUFIX}.stmp
 	_WT_BRANCH=wt-tmp
 	_FT_BRANCHES=`git branch -r | grep "ft-" | awk -F'/' '{print$2}'`
+	echo "-- About to rebase the next $(echo ${_FT_BRANCHES} | wc -w) feature branches: $_FT_BRANCHES"
 	
 	if [ ! -e ${_STMP_FILE} ]; then
-		# Fetch the latest wireless-testing
+		# etch the latest wireless-testing
+		echo "-- Checking out ${WT}/master into ${_WT_BRANCH}"
 		git checkout ${WT}/master -b ${_WT_BRANCH} || die "Failed to checkout ${WT}/master."
 		touch ${_STMP_FILE}
 	fi
@@ -121,23 +123,27 @@ function rebase-ft(){
 	for branch in ${_FT_BRANCHES}; do
 		_ISREBASED=`grep ${branch} ${_STMP_FILE}`
 		if [ "${_ISREBASED}" == ""  ]; then
-
+			echo "-- Checking out origin/${branch} into ${branch}-${_SUFIX}"
 	                git checkout origin/${branch} -b ${branch}-${_SUFIX} || \
 				die "Failed to checkout origin/${branch}."
+			#Creating stamp file
 			echo "${branch}-${_SUFIX}" >> ${_STMP_FILE}
+			echo "-- Rebasing ${branch}-${_SUFIX} onto ${_WT_BRANCH}"
 			git rebase ${_WT_BRANCH} ${branch}-${_SUFIX} || \
 				die "Failed to rebase ${branch}-${_SUFIX}. Please, solve the conflicts, git add and git rebase --continue. Then execute this script again to continue recreating the branch."
 
 			# Check if the patches are already upstream. If they are, the
 			# ft-branch is deleted both remotely and locally.
 			if [ "`git rev-parse ${branch}-${_SUFIX}`" == "`git rev-parse ${_WT_BRANCH}`"  ]; then
+				echo "-- Feature branch already upstream. Deleting branch localy and in the repository"
 				git push ${O11S} :${branch} || die "Failed to delete the branch in the repository."
 				git checkout ${AVAILABLE_BRANCH} || die "Failed to change the branch to ${_WT_BRANCH}."
 				git branch -D ${branch}-${_SUFIX} || die "Failed to delete the branch ${branch}-${_SUFIX}"
-				#git branch -r -d ${O11S}/${branch} || die "Failed to delete the branch ${O11S}/${branch}"
+				git branch -r -d ${O11S}/${branch} || die "Failed to delete the branch ${O11S}/${branch}"
 			fi
 		fi
 	done
+	echo "-- FT Branches rebasing complete! "
 }
 
 # Recreate bleeding-edge
@@ -152,28 +158,35 @@ function recreate_be(){
 
         if [ ! -e ${_BE_STMP_FILE} ]; then
                 #fetch latest wireless-testing
+		echo "-- Checking out the latest ${WT}/master into ${_NEW_BE}"
                 git checkout ${WT}/master -b ${_NEW_BE}
                 touch ${_BE_STMP_FILE}
 	else
+		echo "-- Checking out ${_NEW_BE}"
 		git checkout ${_NEW_BE}
         fi
-	
+
 	_TMP_FT_BRANCHES=`git branch | grep ft | grep -v can | grep tmp`
+	echo "-- About to merge ${_NEW_BE} with the next $(echo ${_TMP_FT_BRANCHES} | wc -w) feature branches: $_TMP_FT_BRANCHES"
 	# merge all temporary ft branches with the latest wireless testing
         for branch in ${_TMP_FT_BRANCHES}; do
                 _ISMERGED=`grep ${branch} ${_BE_STMP_FILE}`
                 if [ "${_ISMERGED}" == ""  ]; then
                         echo "${branch}" >> ${_BE_STMP_FILE}
+			echo "-- Merging ${branch} with ${_NEW_BE}"
 			git merge --no-ff --log ${branch} || \
 			die "Failed to merge ${_NEW_BE} and ${branch}. Please, solve the conflicts and commit. Then execute this script to continue recreating the branch."
                 fi
         done
+	
+	echo "-- Bleeding edge recreated --> ${_NEW_BE}"
 }
 
 # Delete all the temp branches and stamp files
 function clean(){
 	
-#	_TMP_BRANCHES=`git branch | grep -e '-can'`
+	#_TMP_BRANCHES=`git branch | grep -e '-can'`
+	echo "-- Switching to an availabe branch: ${AVAILABLE_BRANCH}"
 	git checkout ${AVAILABLE_BRANCH} || die "Failed to checkout ${AVAILABLE_BRANCH}."
 	_TMP_BRANCHES=`git branch | grep -e '-tmp'`
 	for branch in ${_TMP_BRANCHES}; do
