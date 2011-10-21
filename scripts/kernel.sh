@@ -8,7 +8,7 @@ while getopts "p:h" options; do
         case ${options} in
                 p ) SRC_PATH=${OPTARG};;
                 h ) echo Options:
-                    echo "-r                        Path to the kernel source"
+                    echo "-p                        Path to the kernel source"
                     echo "-h                        Shows help"
                     exit 1;;
                 * ) echo ${usage}
