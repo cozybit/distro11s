@@ -3,7 +3,7 @@
 source `dirname $0`/common.sh
 
 PACKAGE=all
-DESTINATION="/"
+DIR="/"
 # HOSTNAME set by foreach.sh
 # don't push to ourselves
 [ $HOSTNAME != `hostname` ] && U=root@$HOSTNAME.local
@@ -16,8 +16,8 @@ push.sh: push distro11s to a deployed system using rsync
 
 -u <user@host> User and Hostname (or IP address) of the device to push to.
 
--d <destination> Destination directory on the device (default is
-                 ${DESTINATION})
+-d <directory> Directory in your target staging to sync with the device,
+		default is ${DIR}
 -p <package_name> It will push only the files related to that package
 
 EOF
@@ -31,7 +31,7 @@ do
         case "$arg" in
                 --help) args="${args}-h ";;
 		--board) args="${args}";;
-                --destination) args="${args}-d ";;
+                --dir) args="${args}-d ";;
 		--package) args="${args}-p ";;
                 # pass through anything else
                 *) [[ "${arg:0:1}" == "--" ]] || delim="\""
@@ -47,7 +47,7 @@ while getopts "hu:d:b:p:" opt; do
 		h)	print_help
 			exit 0;;
 		u)	U=${OPTARG};;
-		d)	DESTINATION=${OPTARG};;
+		d)	DIR=${OPTARG};;
 		p)	PACKAGE=${OPTARG};;
 		\?)	echo "Invalid option: -${OPTARG}" >&2
 			exit 1;;
@@ -70,8 +70,8 @@ if [[ "${U}" == *@`hostname`* ]]; then
 fi
 
 # NB: trailing slash is important!
-SRC=${STAGING}/
-DEST=${U}:${DESTINATION}
+SRC=${STAGING}/${DIR}/
+DEST=${U}:${DIR}
 
 if [ "${PACKAGE}" == "kernel" ]; then
 	echo "About to push the kernel"
