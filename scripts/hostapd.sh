@@ -4,7 +4,7 @@ source `dirname $0`/common.sh
 
 Q pushd ${DISTRO11S_SRC}/hostap/hostapd || exit 1
 
-CONFIG=${TOP}/board/${DISTRO11S_BOARD}/${DISTRO11S_BOARD}_hostapd.config
+CONFIG=${TOP}/board/${DISTRO11S_BOARD}/hostapd_build.config
 if [ ! -e ${CONFIG} ]; then
 	echo "No config for hostapd in ${CONFIG}, using default"
 	CONFIG=defconfig
