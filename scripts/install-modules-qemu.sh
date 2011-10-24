@@ -1,6 +1,6 @@
 #! /bin/bash
 
-. scripts/common.sh
+source `dirname $0`/common.sh
 
 LOOPDEV=/dev/loop0
 MNTPOINT=`sudo mktemp -d --tmpdir=/mnt`
