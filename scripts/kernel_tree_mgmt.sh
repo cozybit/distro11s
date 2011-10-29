@@ -75,9 +75,9 @@ function init(){
 	fi
 
 	echo "-- Fecthing from ${O11S}"
-	git fetch ${O11S} || die "Failed to fetch ${O11S}."
+	git fetch -p ${O11S} || die "Failed to fetch ${O11S}."
 	echo "-- Fecthing from ${WT}"
-	git fetch ${WT} || die "Failed to fetch ${WT}."
+	git fetch -p ${WT} || die "Failed to fetch ${WT}."
 }
 
 # TODO: make this function way faster by analyzing .git/config 
@@ -107,15 +107,16 @@ function rebase-ft(){
 		_SUFIX=can
 	fi
 
+	A
 	_STMP_FILE=rebase-ft-${_SUFIX}.stmp
 	_WT_BRANCH=wt-tmp
-	_FT_BRANCHES=`git branch -r | grep "ft-" | awk -F'/' '{print$2}'`
+	_FT_BRANCHES=`git branch -r | grep ${O11S} | grep "ft-" | awk -F'/' '{print$2}'`
 	echo "-- About to rebase the next $(echo ${_FT_BRANCHES} | wc -w) feature branches: $_FT_BRANCHES"
 	
 	if [ ! -e ${_STMP_FILE} ]; then
 		# etch the latest wireless-testing
 		echo "-- Checking out ${WT}/master into ${_WT_BRANCH}"
-		git checkout ${WT}/master -b ${_WT_BRANCH} || die "Failed to checkout ${WT}/master."
+		git checkout ${WT}/master -B ${_WT_BRANCH} || die "Failed to checkout ${WT}/master."
 		touch ${_STMP_FILE}
 	fi
 	
@@ -124,7 +125,7 @@ function rebase-ft(){
 		_ISREBASED=`grep ${branch} ${_STMP_FILE}`
 		if [ "${_ISREBASED}" == ""  ]; then
 			echo "-- Checking out origin/${branch} into ${branch}-${_SUFIX}"
-	                git checkout origin/${branch} -b ${branch}-${_SUFIX} || \
+	                git checkout origin/${branch} -B ${branch}-${_SUFIX} || \
 				die "Failed to checkout origin/${branch}."
 			#Creating stamp file
 			echo "${branch}-${_SUFIX}" >> ${_STMP_FILE}
@@ -139,7 +140,7 @@ function rebase-ft(){
 				git push ${O11S} :${branch} || die "Failed to delete the branch in the repository."
 				git checkout ${AVAILABLE_BRANCH} || die "Failed to change the branch to ${_WT_BRANCH}."
 				git branch -D ${branch}-${_SUFIX} || die "Failed to delete the branch ${branch}-${_SUFIX}"
-				git branch -r -d ${O11S}/${branch} || die "Failed to delete the branch ${O11S}/${branch}"
+				git branch -r -D ${O11S}/${branch} || die "Failed to delete the branch ${O11S}/${branch}"
 			fi
 		fi
 	done
@@ -159,7 +160,7 @@ function recreate_be(){
         if [ ! -e ${_BE_STMP_FILE} ]; then
                 #fetch latest wireless-testing
 		echo "-- Checking out the latest ${WT}/master into ${_NEW_BE}"
-                git checkout ${WT}/master -b ${_NEW_BE}
+                git checkout ${WT}/master -B ${_NEW_BE}
                 touch ${_BE_STMP_FILE}
 	else
 		echo "-- Checking out ${_NEW_BE}"
@@ -190,7 +191,6 @@ function clean(){
 	git checkout ${AVAILABLE_BRANCH} || die "Failed to checkout ${AVAILABLE_BRANCH}."
 	_TMP_BRANCHES=`git branch | grep -e '-tmp'`
 	for branch in ${_TMP_BRANCHES}; do
-		git branch -d ${branch} || \
 		git branch -D ${branch}
 	done
 	rm -f *.stmp &> /dev/null
