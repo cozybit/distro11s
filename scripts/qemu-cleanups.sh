@@ -66,17 +66,6 @@ if [ "${DISTRO11S_SSH_PUB_KEY}" != "" -a -e "${DISTRO11S_SSH_PUB_KEY}" ]; then
 		cat ${DISTRO11S_SSH_PUB_KEY} >> ${AUTH_KEYS} || exit 1
 	fi
 fi
-sudo chmod 760 -R ${STAGING}/root/
-
-# Fix up ssh directory permissions so that key authentication works
-if [ -d ${STAGING}/root ]; then
-	sudo chown -R root.root ${STAGING}/root
-	sudo chmod 700 ${STAGING}/root
-fi
-
-if [ -d ${STAGING}/root/.ssh ]; then
-	sudo chmod 700 ${STAGING}/root/.ssh
-	sudo chmod 600 ${STAGING}/root/.ssh/*
-fi
+sudo chmod 700 -R ${STAGING}/root/
 
 touch ${STAMPS}/qemu-cleanups
