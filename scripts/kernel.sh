@@ -26,7 +26,7 @@ fi
 
 # set kernel extraversion to our git HEAD SHA-1
 HEAD_SHA=`git log --oneline -n1 | awk '{print $1}'`
-sed -i "s/^\(EXTRAVERSION = -rc[[:digit:]]*\).*$/\1-${HEAD_SHA}/" Makefile
+sed -i "s/^\(EXTRAVERSION =\($\| -rc[[:digit:]]*\)\).*$/\1-${HEAD_SHA}/" Makefile
 
 do_stamp_cmd kernel.config cp ${CONFIG} ./.config
 do_stamp_cmd kernel.oldconfig "yes \"\" | make oldconfig"
