@@ -1,6 +1,6 @@
 #!/bin/sh -e
 # CRDA workaround
-export COUNTRY=US
+export COUNTRY=00
 /sbin/crda
 
 # mount debugfs
