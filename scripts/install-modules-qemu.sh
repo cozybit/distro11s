@@ -21,6 +21,7 @@ HEAD_SHA=`git log --oneline -n1 | awk '{print $1}'`
 if [ "`ls ${MNTPOINT}/lib/modules | grep ${HEAD_SHA}`" != "" ]; then
 	echo "Deleting old modules"
 	ls -d ${MNTPOINT}/lib/modules/* | grep -v ${HEAD_SHA} | xargs sudo rm -Rf
+	ls -d ${STAGING}/lib/modules/* | grep -v ${HEAD_SHA} | xargs sudo rm -Rf
 else
 	echo "WARNING: The modules installed on your QEMU targe don't match the HEAD SHA of your repository!"
 fi
