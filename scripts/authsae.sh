@@ -1,3 +1,5 @@
+# Copyright © 2011 cozybit Inc.  All rights reserved.
+
 #!/bin/bash
 
 source `dirname $0`/common.sh

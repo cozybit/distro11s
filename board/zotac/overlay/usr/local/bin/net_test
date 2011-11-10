@@ -1,3 +1,5 @@
+# Copyright © 2011 cozybit Inc.  All rights reserved.
+
 #!/bin/bash
 
 USAGE="${0} [-a] [-i] [-k] [-p] [-c <command>] [-r <start>-<end>]"

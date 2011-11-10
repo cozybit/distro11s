@@ -1,3 +1,5 @@
+# Copyright © 2011 cozybit Inc.  All rights reserved.
+
 #!/bin/bash
 
 # This script allows to test the process of creating a new QEMU target

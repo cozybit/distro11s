@@ -1,3 +1,5 @@
+# Copyright © 2011 cozybit Inc.  All rights reserved.
+
 LOOPDEV=/dev/loop0
 MNTPOINT=/mnt/qemu-rootfs
 IMGFILE=${PWD}/out/qemu/rootfs.ext3

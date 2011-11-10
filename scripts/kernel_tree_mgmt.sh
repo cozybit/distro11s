@@ -1,3 +1,5 @@
+# Copyright © 2011 cozybit Inc.  All rights reserved.
+
 #!/bin/bash
 
 # This script allows to run some of the basic management tasks needed by the
