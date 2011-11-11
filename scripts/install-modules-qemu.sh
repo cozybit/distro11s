@@ -8,8 +8,6 @@ LOOPDEV=/dev/loop0
 MNTPOINT=`sudo mktemp -d --tmpdir=/mnt`
 IMGFILE=${DISTRO11S_OUT}/qemu/rootfs.ext3
 
-root_check "This script mounts the loop interface and copies kernel modules to it"
-
 QEMU_RUNNING=`ps aux | grep -c 'qemu/bzImage'`
 [ "${TEST}" == "y" -a  ${QEMU_RUNNING} -gt 1 ] && { echo "qemu is running! Please, halt it."; exit 1; }
 
