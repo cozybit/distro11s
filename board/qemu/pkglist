@@ -3,7 +3,6 @@ kernel;git;git://github.com/cozybit/open80211s.git;master;
 libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;libnl3_0
 iw;git;http://git.sipsolutions.net/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
-hwsim_tests;svn;https://cozybit.svn.cvsdude.com/open80211s/trunk/security/tests;;
 wmediumd;git;git://github.com/cozybit/wmediumd.git;master;
 tshark;;;;
 qemu-cleanups;;;;
