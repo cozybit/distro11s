@@ -1,5 +1,3 @@
-# Copyright © 2011 cozybit Inc.  All rights reserved.
-
 #!/bin/bash
 
 # Pretty simple package.  Allow a local and board-specific overlay file system.

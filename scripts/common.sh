@@ -1,5 +1,3 @@
-# Copyright © 2011 cozybit Inc.  All rights reserved.
-
 # Run a command quietly
 function Q {
 	$* > /dev/null

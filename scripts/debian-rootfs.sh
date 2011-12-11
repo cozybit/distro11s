@@ -1,5 +1,3 @@
-# Copyright © 2011 cozybit Inc.  All rights reserved.
-
 source `dirname $0`/common.sh
 
 if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then

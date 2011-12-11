@@ -1,4 +1,3 @@
-# Copyright © 2011 cozybit Inc.  All rights reserved.
 
 #!/bin/bash
 
