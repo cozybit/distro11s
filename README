@@ -60,9 +60,9 @@ We build distro11s on Ubuntu 11.04.  Here's how:
    $ apt-get install python-dev uml-utilities git debootstrap autoconf libtool flex bison
 
    $ wget -O /usr/share/qemu/pxe-rtl8139.bin \
-     http://svn.savannah.gnu.org/viewvc/*checkout*/trunk/pc-bios/pxe-rtl8139.bin?root=qemu
+     "http://svn.savannah.gnu.org/viewvc/*checkout*/trunk/pc-bios/pxe-rtl8139.bin?root=qemu"
    $ wget -O /usr/share/qemu/pxe-e1000.bin \
-     http://svn.savannah.gnu.org/viewvc/*checkout*/trunk/pc-bios/pxe-e1000.bin?root=qemu
+     "http://svn.savannah.gnu.org/viewvc/*checkout*/trunk/pc-bios/pxe-e1000.bin?root=qemu"
 
    $ sudo apt-get remove gnu-fdisk
 
