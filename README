@@ -57,7 +57,7 @@ We build distro11s on Ubuntu 11.04.  Here's how:
    list of packages is what's required to build all packages for any
    conceivable board.
 
-   $ apt-get install python-dev uml-utilities git debootstrap autoconf libtool flex bison
+   $ apt-get install python-dev uml-utilities git debootstrap autoconf libtool flex bison qemu
 
    $ wget -O /usr/share/qemu/pxe-rtl8139.bin \
      "http://svn.savannah.gnu.org/viewvc/*checkout*/trunk/pc-bios/pxe-rtl8139.bin?root=qemu"
@@ -203,3 +203,18 @@ TIPS AND TRICKS
 
    Note: you can customize the range of nodes you would like to sync by setting
    DISTRO11S_START_NODE and DISTRO11S_END_NODE in your distro11s.conf.
+
+-- If you are working on an older machine that does not support hardware
+   virtualization, you will have to disable kvm:
+
+diff --git a/board/qemu/qemu.sh b/board/qemu/qemu.sh
+index 020daf1..0b7f730 100755
+--- a/board/qemu/qemu.sh
++++ b/board/qemu/qemu.sh
+@@ -27,7 +27,7 @@ ${QEMU} -kernel ${KERNEL} -hda ${ROOTFS} \
+        -append "root=/dev/sda combined_mode=ide console=ttyS0" \
+        -nographic -net nic,model=e1000 -net tap,ifname=${IFNAME},script=no \
+        -gdb tcp::1234 \
+-       -enable-kvm -smp 2
++       -no-kvm -smp 2
+ 
