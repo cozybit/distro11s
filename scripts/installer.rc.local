@@ -29,4 +29,4 @@ export KERNEL=/boot/bzImage
 
 echo $((`cat /etc/hostnumber` + 1)) > /etc/hostnumber
 
-reboot
+halt
