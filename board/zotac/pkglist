@@ -1,5 +1,5 @@
 debian-rootfs;;;;
-kernel;git;git://github.com/cozybit/open80211s.git;bleeding-edge;
+kernel;git;git://github.com/cozybit/open80211s.git;master
 qemu-cleanups;;;;
 linux-firmware;git;git://git.infradead.org/users/dwmw2/linux-firmware.git;master;
 libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;libnl3_0
