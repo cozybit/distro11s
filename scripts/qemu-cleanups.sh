@@ -66,6 +66,7 @@ if [ "${DISTRO11S_SSH_PUB_KEY}" != "" -a -e "${DISTRO11S_SSH_PUB_KEY}" ]; then
 		cat ${DISTRO11S_SSH_PUB_KEY} >> ${AUTH_KEYS} || exit 1
 	fi
 fi
-sudo chmod 700 -R ${STAGING}/root/
+sudo chmod 644 -R ${STAGING}/root/
+sudo chown -R root.root ${STAGING}/root
 
 touch ${STAMPS}/qemu-cleanups
