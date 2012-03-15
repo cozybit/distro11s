@@ -7,7 +7,7 @@ DIR="/"
 # HOSTNAME set by foreach.sh
 # don't push to ourselves
 [ $HOSTNAME != `hostname` ] && U=root@$HOSTNAME.local
-[ -n $U ] && U=root@${DISTRO11S_STATIC_IP}
+[ -z $U ] && U=root@${DISTRO11S_STATIC_IP}
 
 function print_help {
 	echo "$(cat <<EOF
