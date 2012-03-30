@@ -8,6 +8,7 @@ authsae;git;git://github.com/cozybit/authsae.git;master;
 hostap;git;git://w1.fi/srv/git/hostap.git;master;
 hostapd;;;;
 rootpassword;;;;
+tshark;;;;
 meshkit;;;;
 overlay;;;;
 zotac-cleanups;;;;
