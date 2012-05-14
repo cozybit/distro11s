@@ -4,7 +4,6 @@ source `dirname $0`/common.sh
 
 sed -i -e 's/-lnl-3/-lnl/' ${DISTRO11S_SRC}/authsae/linux/Makefile
 sed -i -e 's/-lnl-genl-3/-lnl-genl/' ${DISTRO11S_SRC}/authsae/linux/Makefile
-sed -i -e 's/-Wall -Werror/-Wall -I.. # -Werror/' ${DISTRO11S_SRC}/authsae/linux/Makefile
 
 Q pushd ${DISTRO11S_SRC}/authsae || exit 1
 export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
