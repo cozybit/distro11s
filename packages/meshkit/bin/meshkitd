@@ -170,7 +170,7 @@ authsae:
 };
 EOF
 )" > /var/run/authsae/authsae.conf
-		meshd-nl80211 -c /var/run/authsae/authsae.conf &> /dev/null &
+		meshd-nl80211 -c /var/run/authsae/authsae.conf &> /var/log/authsae.log &
 		[ $? -eq 0 ] || die "Failed to launch meshd"
 		sleep 3
 	fi
