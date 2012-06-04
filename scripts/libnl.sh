@@ -2,8 +2,25 @@
 
 source `dirname $0`/common.sh
 
-Q pushd ${DISTRO11S_SRC}/libnl || exit 1
-do_stamp_cmd libnl.autogen ./autogen.sh
-do_stamp_cmd libnl.configure ./configure --prefix=${STAGING}/usr/local
-do_stamp_cmd libnl.make "make clean; make;"
-do_stamp_cmd libnl.install make install
+sudo mkdir ${STAGING}/src
+sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
+sudo chroot ${STAGING} apt-get update
+sudo chroot ${STAGING} apt-get -y build-dep libnl
+sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool make
+
+#Q pushd ${DISTRO11S_SRC}/libnl || exit 1
+echo "cd /src/libnl; ./autogen.sh" > ${STAGING}/libnl.sh
+chmod +x ${STAGING}/libnl.sh
+do_stamp_cmd libnl.autogen sudo chroot ${STAGING} /libnl.sh
+echo "cd /src/libnl; ./configure --prefix=/usr/local" > ${STAGING}/libnl.sh
+chmod +x ${STAGING}/libnl.sh
+do_stamp_cmd libnl.configure sudo chroot ${STAGING} /libnl.sh
+echo "cd /src/libnl; make clean; make" > ${STAGING}/libnl.sh
+chmod +x ${STAGING}/libnl.sh
+do_stamp_cmd libnl.make sudo chroot ${STAGING} /libnl.sh
+echo "cd /src/libnl; make install" > ${STAGING}/libnl.sh
+chmod +x ${STAGING}/libnl.sh
+do_stamp_cmd libnl.install sudo chroot ${STAGING} /libnl.sh
+
+sudo umount ${DISTRO11S_SRC}
+rm -f ${STAGING}/libnl.sh

@@ -2,9 +2,19 @@
 
 source `dirname $0`/common.sh
 
-Q pushd ${DISTRO11S_SRC}/iw || exit 1
+sudo mkdir ${STAGING}/src
+sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
+#sudo chroot ${STAGING} apt-get update
+#sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool
 
-do_stamp_cmd iw.make "make clean; make \
-	PKG_CONFIG_PATH=${STAGING}/usr/local/lib/pkgconfig/ \
-	PREFIX=${STAGING}/usr/local/ \
-	V=1 install;"
+#Q pushd ${DISTRO11S_SRC}/iw || exit 1
+
+echo "cd /src/iw; make clean; make \
+	PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/ \
+	PREFIX=/usr/local/ \
+	V=1 install;" > ${STAGING}/iw.sh
+chmod +x ${STAGING}/iw.sh
+do_stamp_cmd iw.make sudo chroot ${STAGING} /iw.sh
+
+sudo umount ${DISTRO11S_SRC}
+rm -f ${STAGING}/iw.sh
