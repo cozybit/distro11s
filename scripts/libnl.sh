@@ -4,9 +4,6 @@ source `dirname $0`/common.sh
 
 sudo mkdir ${STAGING}/src
 sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
-sudo chroot ${STAGING} apt-get update
-sudo chroot ${STAGING} apt-get -y build-dep libnl
-sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool make
 
 #Q pushd ${DISTRO11S_SRC}/libnl || exit 1
 echo "cd /src/libnl; ./autogen.sh" > ${STAGING}/libnl.sh

@@ -13,10 +13,14 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 fi
 
 if [ ! -e ${STAMPS}/debian-rootfs.basepkgs -o ${FORCE_BUILD} -eq 1 ]; then
+	echo "Adding source URIs to sources.list"
+	cat ${STAGING}/etc/apt/sources.list | sed -e 's/^deb/deb-src/' >> ${STAGING}/etc/apt/sources.list
 	echo "Updating package cache"
 	sudo chroot ${STAGING} apt-get update
 	echo "Adding base packages"
 	sudo chroot ${STAGING} apt-get -y --force-yes --no-install-recommends install ${BOARD11S_PACKAGES} || exit 1
+	sudo chroot ${STAGING} apt-get -y build-dep libnl || exit 1
+	sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool make libssl-dev || exit 1
 	touch ${STAMPS}/debian-rootfs.basepkgs
 fi
 

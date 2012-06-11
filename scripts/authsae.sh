@@ -7,8 +7,6 @@ sed -i -e 's/-lnl-genl-3/-lnl-genl/' ${DISTRO11S_SRC}/authsae/linux/Makefile
 
 sudo mkdir ${STAGING}/src
 sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
-#sudo chroot ${STAGING} apt-get update
-sudo chroot ${STAGING} apt-get -y install libssl-dev
 
 #Q pushd ${DISTRO11S_SRC}/authsae || exit 1
 

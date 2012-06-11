@@ -4,8 +4,6 @@ source `dirname $0`/common.sh
 
 sudo mkdir ${STAGING}/src
 sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
-#sudo chroot ${STAGING} apt-get update
-#sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool
 
 #Q pushd ${DISTRO11S_SRC}/iw || exit 1
 
