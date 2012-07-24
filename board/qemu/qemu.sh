@@ -30,6 +30,15 @@ ${QEMU} -nographic -kernel ${KERNEL} \
 	-netdev tap,id=lan0,ifname=$IFNAME,script=no \
 	-enable-kvm -smp 2
 
+# To add a usb device to your qemu build:
+# 1. Make sure you blacklist the module on your host (e.g blacklist carl9170)
+# 2. Add the usb driver to your build
+# 3. Claim ownership of the device by passing the following arguments to qemu:
+#	-usb -usbdevice host:07d1:3c10
+#    The above vendor ID correspond to the ar9170.  Modify if needed.  Look
+#    this up with lsusb on your host.
+# 4. If the device requires firmware, don't forget to add it to your guest
+# rootfs.
 
 # qemu will block here until it is done.  When it returns, we'll eliminate the
 # tap iface.
