@@ -67,6 +67,8 @@ if [ "${DISTRO11S_SSH_PUB_KEY}" != "" -a -e "${DISTRO11S_SSH_PUB_KEY}" ]; then
 	fi
 fi
 sudo chmod 644 -R ${STAGING}/root/
+# Make sure the private key is only accessible by root
+sudo chmod 600 ${STAGING}/root/.ssh/id_rsa
 sudo chown -R root.root ${STAGING}/root
 
 touch ${STAMPS}/qemu-cleanups
