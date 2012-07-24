@@ -76,6 +76,7 @@ EOF
 
 case "$1" in
 start)
+	[ -d /var/run/network ] || mkdir /var/run/network
 
 	if [ -e /etc/distro11s.conf -a "${DISTRO11S_STATIC_IFACE}" != "" -a -e /etc/distro11s-hostnumber ]; then
 		SUFFIX=$((`echo ${DISTRO11S_STATIC_IP} | cut -d '.' -f 4` + `cat /etc/distro11s-hostnumber`))
