@@ -2,7 +2,8 @@
 
 source `dirname $0`/common.sh
 
-LOOPDEV=/dev/loop0
+LOOPDEV=`get_loop_dev`
+#LOOPDEV=/dev/loop0
 MNTPOINT=`sudo mktemp -d --tmpdir=/mnt`
 IMGFILE=${DISTRO11S_OUT}/qemu/rootfs.ext3
 
