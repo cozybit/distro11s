@@ -31,7 +31,8 @@ ${QEMU} -nographic -kernel ${KERNEL} \
 	-enable-kvm -smp 2
 
 # To add a usb device to your qemu build:
-# 1. Make sure you blacklist the module on your host (e.g blacklist carl9170)
+# 1. Make sure you blacklist the module on your host (e.g add blacklist file on 
+#    /etc/modprobe.d/blacklist-carl9170.conf that contains: blacklist carl9170).
 # 2. Add the usb driver to your build
 # 3. Claim ownership of the device by passing the following arguments to qemu:
 #	-usb -usbdevice host:07d1:3c10
