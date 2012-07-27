@@ -1,6 +1,6 @@
 debian-rootfs;;;;
 kernel;git;git://github.com/cozybit/open80211s.git;master;
-libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;libnl3_0
+libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;
 iw;git;http://git.sipsolutions.net/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
 wmediumd;git;git://github.com/cozybit/wmediumd.git;master;
