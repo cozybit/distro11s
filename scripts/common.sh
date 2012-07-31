@@ -149,9 +149,13 @@ function warn_user {
 
 function root_check {
 	if [ ${USER} != root ]; then
-		MSG="Use sudo? [Yn]"
-		warn_user ${*}
-		MSG=""
+		if sudo -n ls &> /dev/null; then
+			echo "Active sudo credentials found, proceeding..."
+		else
+			MSG="Use sudo? [Yn]"
+			warn_user ${*}
+			MSG=""
+		fi
 	fi
 }
 
