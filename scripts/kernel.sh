@@ -34,7 +34,7 @@ do_stamp_cmd kernel.config cp ${CONFIG} ./.config
 do_stamp_cmd kernel.oldconfig "yes \"\" | make oldconfig"
 do_stamp_cmd kernel.make make -j ${DISTRO11S_JOBS}
 do_stamp_cmd kernel.install 'cp ${BOARD11S_KERNEL} ${DISTRO11S_OUT}/${DISTRO11S_BOARD}; cp ${BOARD11S_KERNEL} ${STAGING}/boot;'
-INSTALL_MOD_PATH=${STAGING} do_stamp_cmd "rm -fr ${STAGING}/lib/modules/*; kernel.modules make -j ${DISTRO11S_JOBS} modules_install; "
+INSTALL_MOD_PATH=${STAGING} do_stamp_cmd kernel.modules "rm -fr ${STAGING}/lib/modules/*; make -j ${DISTRO11S_JOBS} modules_install; "
 
 # revert our Makefile change to make git happy
 git checkout Makefile
