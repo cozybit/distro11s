@@ -34,7 +34,7 @@ sudo chmod 777 -R ${STAGING}/root/
 if [ "${DISTRO11S_SSHFS_AUTOMOUNT_PATH}" != "" -a \
 	"${DISTRO11S_HOST_IP}" != ""  ]; then
 	warn_user "This script installs an ssh key without a password on your dev machine!"
-	AUTH_KEYS=/home/${DISTRO11S_SSHFS_AUTOMOUNT_USER}/.ssh/authorized_keys
+	AUTH_KEYS=`getent passwd $DISTRO11S_SSHFS_AUTOMOUNT_USER | cut -d: -f6`/.ssh/authorized_keys
 	PUB_KEY=${STAGING}/root/.ssh/id_rsa.pub
 
 	if [ -e ${PUB_KEY} ]; then
