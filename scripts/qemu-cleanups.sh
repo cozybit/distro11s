@@ -71,4 +71,7 @@ sudo chmod 644 -R ${STAGING}/root/
 sudo chmod 600 ${STAGING}/root/.ssh/id_rsa
 sudo chown -R root.root ${STAGING}/root
 
+# Make tshark run capture as root
+sudo sed -i -e 's/running_superuser/false/' ${STAGING}/usr/share/wireshark/init.lua
+
 touch ${STAMPS}/qemu-cleanups
