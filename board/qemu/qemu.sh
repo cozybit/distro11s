@@ -28,7 +28,8 @@ ${QEMU} -nographic -kernel ${KERNEL} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
 	-device e1000,netdev=lan0 \
 	-netdev tap,id=lan0,ifname=$IFNAME,script=no \
-	-enable-kvm -smp 2
+	-enable-kvm -smp 2 \
+	-gdb tcp::1234
 
 # To add a usb device to your qemu build:
 # 1. Make sure you blacklist the module on your host (e.g add blacklist file on 
