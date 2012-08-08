@@ -181,7 +181,7 @@ function add_text {
 # put common cleanup steps you definitely want executed on exit here
 function cleanup {
 	# some scripts may mount this for chroot builds
-	Q sudo umount ${DISTRO11S_SRC}
+	sudo umount ${DISTRO11S_SRC} &> /dev/null
 }
 
 trap cleanup INT HUP QUIT TERM EXIT
