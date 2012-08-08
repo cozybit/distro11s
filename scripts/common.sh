@@ -178,6 +178,14 @@ function add_text {
         [ "${_CHECK}" == "" ] && echo -e "echo \"${_TXT}\" >> ${_FILE}" | sudo sh
 }
 
+# put common cleanup steps you definitely want executed on exit here
+function cleanup {
+	# some scripts may mount this for chroot builds
+	Q sudo umount ${DISTRO11S_SRC}
+}
+
+trap cleanup INT HUP QUIT TERM EXIT
+
 # Now perform all of the common setup steps and variables used by just about
 # every script
 set_top || exit 1
