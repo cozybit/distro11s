@@ -5,8 +5,8 @@ if [ -e ${STAMPS}/make_ext3fs -a ! ${FORCE_BUILD} -eq 1 ]; then
 fi
 
 function die {
-	sudo losetup -d ${LOOPDEV}
 	sudo umount ${MNTPOINT}
+	sudo losetup -d ${LOOPDEV}
 	exit $1
 }
 
@@ -16,10 +16,10 @@ SIZE=`sudo du -s -B 1k ${STAGING} | awk '{print $1}'`
 SIZE=$((${SIZE}*140/100))
 echo "Creating ${SIZE}kB ext3 file system image"
 dd if=/dev/zero of=${IMAGE} bs=1k count=${SIZE} || exit 1
-LOOPDEV=`get_loop_dev`
+LOOPDEV=`sudo losetup --show --find ${IMAGE}`
 MNTPOINT=`sudo mktemp -d --tmpdir=/mnt`
 sudo mkfs -t ext3 -m 1 -v ${LOOPDEV} || die 1
-sudo mount -o loop ${IMAGE} ${MNTPOINT} || die 1
+sudo mount ${LOOPDEV} ${MNTPOINT} || die 1
 echo "Copying rootfs from ${STAGING} to ${MNTPOINT}.  This may take a while...."
 sudo cp -ra ${STAGING}/* ${MNTPOINT} || die 1
 touch ${STAMPS}/make_ext3fs

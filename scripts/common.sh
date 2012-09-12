@@ -3,29 +3,6 @@ function Q {
 	$* > /dev/null
 }
 
-# Find available loop device
-function get_loop_dev {
-	local SUCCESS=0
-	local LOOPDEV=""
-	for LOOPDEV in `ls /dev/loop*`; do
-		#echo "Trying loop device ${LOOPDEV}"
-		sudo losetup ${LOOPDEV} ${IMAGE}
-		R=${?}
-		if [ "${R}" = "0" ]; then
-			SUCCESS=1
-			break;
-		else
-			continue
-		fi
-	done
-	if [ ${SUCCESS} -eq 0 ]; then
-		echo "Failed to set up loop device"
-		exit 1
-	else
-		echo ${LOOPDEV}
-	fi
-}
-
 # set the TOP variable to the top of the distro11s source tree.  Assume that $0
 # came from the scripts directory.
 function set_top {
