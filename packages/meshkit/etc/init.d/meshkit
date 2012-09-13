@@ -28,6 +28,7 @@ case "$1" in
   stop)
 	log_daemon_msg "Stopping meshkitd"
 	killall -w meshkitd &> /dev/null
+	killall -w wpa_supplicant &> /dev/null
 	log_end_msg 0
 	;;
 

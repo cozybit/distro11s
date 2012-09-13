@@ -273,7 +273,12 @@ if [ "${CTL_IF}" != "" ]; then
 			done
 
 			log -n "Connecting to control network ${CTL_SSID}..."
-			try iw ${CTL_IF} connect ${CTL_SSID} || continue
+			if [${CTL_KEY} == "" ]; then
+				try iw ${CTL_IF} connect ${CTL_SSID} || continue
+			elif [ -z "$(pidof wpa_supplicant)" ]; then
+				wpa_passphrase ${CTL_SSID} ${CTL_KEY} | wpa_supplicant -s -B -D nl80211 -i ${CTL_IF} -c /dev/stdin
+			fi
+
 			COUNT=20
 			while [ ${COUNT} -gt 0 ]; do
 				STATUS=`iw wlan1 link | head -1 | awk '{print $1}'`
