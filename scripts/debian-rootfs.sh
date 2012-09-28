@@ -20,7 +20,7 @@ if [ ! -e ${STAMPS}/debian-rootfs.basepkgs -o ${FORCE_BUILD} -eq 1 ]; then
 	echo "Adding base packages"
 	sudo chroot ${STAGING} apt-get -y --force-yes --no-install-recommends install ${BOARD11S_PACKAGES} || exit 1
 	sudo chroot ${STAGING} apt-get -y build-dep libnl || exit 1
-	sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool make libssl-dev tshark cmake python-dev || exit 1
+	sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool make libssl-dev tshark cmake python-dev vde2 bc || exit 1
 	touch ${STAMPS}/debian-rootfs.basepkgs
 fi
 
