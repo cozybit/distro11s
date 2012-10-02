@@ -11,7 +11,7 @@ QEMU_RUNNING=`ps aux | grep -c 'qemu/bzImage'`
 
 sudo mount -t ext3 ${LOOPDEV} ${MNTPOINT}
 cd ${DISTRO11S_SRC}/kernel 
-sudo INSTALL_MOD_PATH=$MNTPOINT make modules_install
+sudo INSTALL_MOD_PATH=$MNTPOINT make modules_install || exit $?
 HEAD_SHA=`git log --oneline -n1 | awk '{print $1}'`
 if [ "`ls ${MNTPOINT}/lib/modules | grep ${HEAD_SHA}`" != "" ]; then
 	echo "Deleting old modules"
