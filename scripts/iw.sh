@@ -2,10 +2,8 @@
 
 source `dirname $0`/common.sh
 
-sudo mkdir ${STAGING}/src
+[ -d ${STAGING}/src ] || sudo mkdir ${STAGING}/src
 sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
-
-#Q pushd ${DISTRO11S_SRC}/iw || exit 1
 
 echo "cd /src/iw; make clean; make \
 	PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/ \

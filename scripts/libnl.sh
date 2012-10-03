@@ -2,10 +2,9 @@
 
 source `dirname $0`/common.sh
 
-sudo mkdir ${STAGING}/src
+[ -d ${STAGING}/src ] || sudo mkdir ${STAGING}/src
 sudo mount --bind ${DISTRO11S_SRC} ${STAGING}/src
 
-#Q pushd ${DISTRO11S_SRC}/libnl || exit 1
 echo "cd /src/libnl; ./autogen.sh" > ${STAGING}/libnl.sh
 chmod +x ${STAGING}/libnl.sh
 do_stamp_cmd libnl.autogen sudo chroot ${STAGING} /libnl.sh
