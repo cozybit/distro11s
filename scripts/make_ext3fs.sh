@@ -13,7 +13,8 @@ function die {
 root_check "This script mounts drives and makes file systems."
 IMAGE=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/rootfs.ext3
 SIZE=`sudo du -s -B 1k ${STAGING} | awk '{print $1}'`
-SIZE=$((${SIZE}*140/100))
+# add another 20% for extra modules, programs, etc.
+SIZE=`echo "($SIZE * 120 / 100) + $SIZE" | bc`
 echo "Creating ${SIZE}kB ext3 file system image"
 dd if=/dev/zero of=${IMAGE} bs=1k count=${SIZE} || exit 1
 LOOPDEV=`sudo losetup --show --find ${IMAGE}`
