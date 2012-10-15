@@ -1,7 +1,7 @@
 debian-rootfs;;;;
 kernel;git;git://github.com/cozybit/open80211s.git;master
 qemu-cleanups;;;;
-linux-firmware;git;git://git.infradead.org/users/dwmw2/linux-firmware.git;master;
+linux-firmware;git;git://git.kernel.org/pub/scm/linux/kernel/git/dwmw2/linux-firmware.git;master;
 libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;libnl3_0
 iw;git;http://git.sipsolutions.net/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
