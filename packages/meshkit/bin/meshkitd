@@ -166,6 +166,7 @@ authsae:
     band="${MESH_BAND}";
     channel=${MESH_CHANNEL};
     htmode="${MESH_HTMODE}";
+    mcast-rate=12;
   };
 };
 EOF
