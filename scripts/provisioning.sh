@@ -111,24 +111,25 @@ linux /boot/bzImage root=/dev/sdb1 rootdelay=10
 boot
 EOF
 )" > /tmp/grub.cfg
-       sudo mv /tmp/grub.cfg ${DRIVE}/boot/grub/
-       echo "Copying the file system to provision"
-       sudo mkdir ${DRIVE}/staging
-       sudo cp -ra ${STAGING}/* ${DRIVE}/staging
-       echo "Adding provisioning rc.local script and its dependencies"
-       sudo cp ${TOP}/scripts/provisioning.sh ${DRIVE}/usr/local/bin/
-       sudo cp ${TOP}/scripts/installer.rc.local ${DRIVE}/etc/rc.local
-       sudo chmod +x ${DRIVE}/etc/rc.local
-	   # We don't want to apt-get install grub because it will mess with our
-	   # MBR.  But we need it on the installer.  So grab it from the host
-	   # system.  Note the smartest thing to do.  Oh well.
-	   sudo cp /usr/bin/grub-* ${DRIVE}/usr/bin/ || exit 1
-	   sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
-	   sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
-	   sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper || exit 1
-       
-       #Removing meshkit service from the usb installer
-       insserv -r ${DRIVE}/etc/init.d/meshkit || exit 1
+	sudo mv /tmp/grub.cfg ${DRIVE}/boot/grub/
+	echo "Copying the file system to provision"
+	sudo mkdir ${DRIVE}/staging
+	sudo cp -ra ${STAGING}/* ${DRIVE}/staging
+	echo "Adding provisioning rc.local script and its dependencies"
+	sudo cp ${TOP}/scripts/provisioning.sh ${DRIVE}/usr/local/bin/
+	sudo cp ${TOP}/scripts/installer.rc.local ${DRIVE}/etc/rc.local
+	sudo chmod +x ${DRIVE}/etc/rc.local
+	# We don't want to apt-get install grub because it will mess with our
+	# MBR.  But we need it on the installer.  So grab it from the host
+	# system.  Note the smartest thing to do.  Oh well.
+	sudo cp /usr/bin/grub-* ${DRIVE}/usr/bin/ || exit 1
+	sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
+	sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
+	sudo chroot ${DRIVE} apt-get -f install -y --force-yes || exit 1
+	sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper1.02.1 || exit 1
+
+	#Removing meshkit service from the usb installer
+	/usr/lib/insserv/insserv -r ${DRIVE}/etc/init.d/meshkit || exit 1
    fi
 
    if [ "${HOSTNUM}" != "" ]; then
