@@ -5,6 +5,7 @@ iw;git;http://git.sipsolutions.net/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
 trace-cmd;git;git://git.kernel.org/pub/scm/linux/kernel/git/rostedt/trace-cmd.git;master;
 wmediumd;git;git://github.com/cozybit/wmediumd.git;master;
+mccatool;;;;
 qemu-cleanups;;;;
 overlay;;;;
 make_ext3fs;;;;
