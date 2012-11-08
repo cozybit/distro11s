@@ -11,5 +11,5 @@ do_stamp_cmd authsae.make sudo chroot ${STAGING} /authsae.sh
 mkdir -p ${STAGING}/usr/local/share/authsae/ || exit 1
 do_stamp_cmd authsae.files cp -r ${DISTRO11S_SRC}/authsae/config ${STAGING}/usr/local/share/authsae/
 
-sudo umount ${DISTRO11S_SRC}
+sudo umount ${STAGING}/src
 rm -f ${STAGING}/authsae.sh

@@ -14,5 +14,5 @@ do_stamp_cmd mccatool.make sudo chroot ${STAGING} /mccatool.sh
 
 do_stamp_cmd mccatool.files cp -r ${DISTRO11S_SRC}/kernel/mcca_utils/mccatool/mccatool ${STAGING}/usr/local/bin/
 
-sudo umount ${DISTRO11S_SRC}
+sudo umount ${STAGING}/src
 rm -f ${STAGING}/mccatool.sh

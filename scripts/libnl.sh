@@ -18,5 +18,5 @@ echo "cd /src/libnl; make install" > ${STAGING}/libnl.sh
 chmod +x ${STAGING}/libnl.sh
 do_stamp_cmd libnl.install sudo chroot ${STAGING} /libnl.sh
 
-sudo umount ${DISTRO11S_SRC}
+sudo umount ${STAGING}/src
 rm -f ${STAGING}/libnl.sh

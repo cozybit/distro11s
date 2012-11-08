@@ -11,5 +11,5 @@ do_stamp_cmd trace-cmd.make sudo chroot ${STAGING} /trace-cmd.sh
 
 do_stamp_cmd trace-cmd.files cp -r ${DISTRO11S_SRC}/trace-cmd/trace-cmd ${STAGING}/usr/local/bin/
 
-sudo umount ${DISTRO11S_SRC}
+sudo umount ${STAGING}/src
 rm -f ${STAGING}/trace-cmd.sh

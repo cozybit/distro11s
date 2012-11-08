@@ -12,5 +12,5 @@ do_stamp_cmd wmediumd.install cp ${DISTRO11S_SRC}/wmediumd/wmediumd/wmediumd ${S
 mkdir -p ${STAGING}/etc/wmediumd/
 do_stamp_cmd wmediumd.install_etc cp ${DISTRO11S_SRC}/wmediumd/wmediumd/cfg-examples/* ${STAGING}/etc/wmediumd/
 
-sudo umount ${DISTRO11S_SRC}
+sudo umount ${STAGING}/src
 rm -f ${STAGING}/wmediumd.sh

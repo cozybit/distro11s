@@ -12,5 +12,5 @@ echo "cd /src/iw; make clean; make \
 chmod +x ${STAGING}/iw.sh
 do_stamp_cmd iw.make sudo chroot ${STAGING} /iw.sh
 
-sudo umount ${DISTRO11S_SRC}
+sudo umount ${STAGING}/src
 rm -f ${STAGING}/iw.sh
