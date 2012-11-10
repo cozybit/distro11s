@@ -144,6 +144,7 @@ if [ "${MESH_IF}" != "" ]; then
 		# files required by authsae
 		mkdir -p /var/run/authsae || die "Failed to create authsae config dir"
 		[ "${MESH_HTMODE}" == "" ] && MESH_HTMODE="none"
+		[ "${MESH_MCAST_RATE}" == "" ] && MESH_MCAST_RATE=12
 		echo "$(cat <<EOF
 authsae:
 {
@@ -166,7 +167,7 @@ authsae:
     band="${MESH_BAND}";
     channel=${MESH_CHANNEL};
     htmode="${MESH_HTMODE}";
-    mcast-rate="${MESH_MCAST_RATE}";
+    mcast-rate=${MESH_MCAST_RATE};
   };
 };
 EOF
