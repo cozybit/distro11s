@@ -70,8 +70,8 @@ if [ "${ISVALID}" != "0" ]; then
        sleep 1
    done
    [ ! -e ${DEV}1 ] && { echo "Error: failed to find new partition ${DEV}1"; exit 1;}
-   echo "Creating the EXT3 file system for ${DEV}1"
-   sudo mkfs -t ext3 -m 1 ${DEV}1
+   echo "Creating the EXT4 file system for ${DEV}1"
+   sudo mkfs -t ext4 ${DEV}1
    [ "$?" != "0" ] && { echo "Error: problem formating the partition. Aborting distro11s provisioning"; exit 1; }
    echo "Mounting ${DEV}1"
    sudo mkdir -p ${DRIVE}
