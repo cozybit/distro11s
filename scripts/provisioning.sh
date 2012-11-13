@@ -129,7 +129,9 @@ EOF
 	sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper1.02.1 || exit 1
 
 	#Removing meshkit service from the usb installer
-	/usr/lib/insserv/insserv -r ${DRIVE}/etc/init.d/meshkit || exit 1
+	INSSERV=`sudo which insserv`
+	[ -z "$INSSERV" ] && INSSERV=/usr/lib/insserv/insserv
+	sudo $INSSERV -r ${DRIVE}/etc/init.d/meshkit || exit 1
    fi
 
    if [ "${HOSTNUM}" != "" ]; then
