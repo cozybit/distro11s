@@ -71,6 +71,13 @@ sudo chmod 644 -R ${STAGING}/root/
 sudo chmod 600 ${STAGING}/root/.ssh/id_rsa
 sudo chown -R root.root ${STAGING}/root
 
+# set regulatory domain
+echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
+echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
+# CRDA debian package expects iw in /usr/sbin/ and /sbin/
+sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/usr/sbin/iw
+sudo ln -s ${STAGING}/usr/local/sbin/iw ${STAGING}/sbin/iw
+
 # Make tshark run capture as root
 sudo sed -i -e 's/running_superuser/false/' ${STAGING}/usr/share/wireshark/init.lua
 
