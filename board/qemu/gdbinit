@@ -1,0 +1,11 @@
+set architecture i386:x86-64:intel
+target remote localhost:1234
+file vmlinux
+# unfortunately, these offsets can only be known at runtime. Hopefully they
+# don't change that much. Should match offsets in current development base
+# kernel.
+# check /proc/modules if these aren't right.
+add-symbol-file net/wireless/cfg80211.o 0xffffffffa0000000
+add-symbol-file net/mac80211/mac80211.o 0xffffffffa003c000
+add-symbol-file drivers/net/wireless/mac80211_hwsim.o 0xffffffffa00fc000
+continue
