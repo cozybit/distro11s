@@ -197,6 +197,13 @@ if [ "${DISTRO11S_BOARD}" = "" ]; then
 fi
 
 # set up some internal variables and directories
+COMMONCONF=${TOP}/board/board.conf
+if [ ! -e ${COMMONCONF} ]; then
+	echo "Missing common board configuration (${COMMONCONF})"
+	exit 1
+fi
+source ${COMMONCONF}
+
 BOARDCONF=${TOP}/board/${DISTRO11S_BOARD}/${DISTRO11S_BOARD}.conf
 if [ ! -e ${BOARDCONF} ]; then
 	echo "Board ${DISTRO11S_BOARD} has no configuration (${BOARDCONF})"

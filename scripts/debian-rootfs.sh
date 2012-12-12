@@ -9,20 +9,17 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 	sudo chmod -R a+r ${STAGING}/
 	sudo chmod a+x ${STAGING}/root
 	sudo chmod a+x ${STAGING}/ldconfig
+	echo "Adding source URIs to sources.list"
+	cat ${STAGING}/etc/apt/sources.list | sed -e 's/^deb/deb-src/' >> ${STAGING}/etc/apt/sources.list
 	touch ${STAMPS}/debian-rootfs.bootstrapped
 fi
 
-if [ ! -e ${STAMPS}/debian-rootfs.basepkgs -o ${FORCE_BUILD} -eq 1 ]; then
-	echo "Adding source URIs to sources.list"
-	cat ${STAGING}/etc/apt/sources.list | sed -e 's/^deb/deb-src/' >> ${STAGING}/etc/apt/sources.list
-	echo "Updating package cache"
-	sudo chroot ${STAGING} apt-get update
-	echo "Adding base packages"
-	sudo chroot ${STAGING} apt-get -y --force-yes --no-install-recommends install ${BOARD11S_PACKAGES} || exit 1
-	sudo chroot ${STAGING} apt-get -y build-dep libnl || exit 1
-	sudo chroot ${STAGING} apt-get -y install autoconf bison flex libtool make libssl-dev cmake python-dev vde2 bc libglib-2.0-dev libevent || exit 1
-	touch ${STAMPS}/debian-rootfs.basepkgs
-fi
+echo "Updating package cache"
+sudo chroot ${STAGING} apt-get update
+echo "Updating base packages"
+sudo chroot ${STAGING} apt-get upgrade
+sudo chroot ${STAGING} apt-get -y --force-yes --no-install-recommends install ${BOARD11S_PACKAGES} || exit 1
+sudo chroot ${STAGING} apt-get -y build-dep ${BOARD11S_BUILDDEP_PACKAGES} || exit 1
 
 cp ${DISTRO11S_CONF} ${STAGING}/etc/distro11s.conf || exit 1
 
