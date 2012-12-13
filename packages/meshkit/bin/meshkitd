@@ -233,7 +233,7 @@ if [ "${INFRA_IF}" != "" ]; then
 			sleep 2
 		done
 	else
-		ifconfig br0 ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
+		ip addr add ${REAL_MESH_IP}/24 dev br0 || die "Failed to set static IP on mesh interface"
 	fi
 
 	#Wait until we die
@@ -254,7 +254,7 @@ if [ "${CTL_IF}" != "" ]; then
 		log "Launching dhcp client daemon"
                 dhclient -d -v ${IFACE} &> /var/log/dhclient.log &
 	else
-		ifconfig ${IFACE} ${REAL_MESH_IP} || die "Failed to set static IP on mesh interface"
+		ip addr add ${REAL_MESH_IP}/24 dev $IFACE || die "Failed to set static IP on mesh interface"
 	fi
 
 	ifconfig -a | grep ${CTL_IF} &> /dev/null || die "No such iface ${CTL_IF}"
