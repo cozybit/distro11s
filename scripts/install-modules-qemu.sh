@@ -20,5 +20,6 @@ if [ "`ls ${MNTPOINT}/lib/modules | grep ${HEAD_SHA}`" != "" ]; then
 else
 	echo "WARNING: The modules installed on your QEMU targe don't match the HEAD SHA of your repository!"
 fi
+sleep 1
 sudo umount ${MNTPOINT}
 sudo losetup -d ${LOOPDEV}
