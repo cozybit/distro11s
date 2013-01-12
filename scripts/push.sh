@@ -97,5 +97,5 @@ fi
 
 if [ "${PACKAGE}" == "all" ]; then
 	echo "About to push ${SRC} to ${DEST}"
-	sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync --exclude='*root/.ssh/*' --exclude='dev' --exclude='proc' --exclude='var/log' --exclude='mnt' --exclude='var/cache' --exclude='etc' -av ${SRC} ${DEST} || exit 1
+	sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID rsync --exclude='*root/' --exclude='dev' --exclude='proc' --exclude='var/log' --exclude='mnt' --exclude='var/cache' --exclude='etc' -av ${SRC} ${DEST} || exit 1
 fi
