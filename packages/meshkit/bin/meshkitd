@@ -116,6 +116,17 @@ if [ "`ifconfig -a | grep br0`" != "" ]; then
 fi
 rm -f /var/log/dhclient.log
 
+mesh_join() {
+	local if=$1
+	local meshid=$2
+	local params="$3"
+	local cmd="iw dev $if mesh join $meshid"
+
+	[ ! -z $MESH_MCAST_RATE ] && cmd="$cmd mcast-rate $MESH_MCAST_RATE"
+	cmd="$cmd $params"
+	$cmd || die "Failed to join mesh"
+}
+
 if [ "${MESH_IF}" != "" ]; then
 	[ "${MESH_CHANNEL}" = "" ] && MESH_CHANNEL=6
 
@@ -138,7 +149,7 @@ if [ "${MESH_IF}" != "" ]; then
 	iw dev mesh0 set channel ${MESH_CHANNEL} ${MESH_HTMODE}|| die "Failed to change to mesh channel"
 	ip link set dev mesh0 up || die "Failed to bring up mesh interface"
 	if [ "${MESH_PASSWORD}" = "" ]; then
-		iw dev mesh0 mesh join ${MESH_ID} || die "Failed to join mesh"
+		mesh_join mesh0 $MESH_ID $MESH_PARAMS
 	else
 		# Set up secure mesh.  Note that first we must create various config
 		# files required by authsae
