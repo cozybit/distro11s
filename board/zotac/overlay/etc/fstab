@@ -1,1 +1,2 @@
 /dev/root	/	ext4	errors=remount-ro,noatime,discard	0	1
+tmpfs           /tmp    tmpfs   rw,auto,users,noatime,size=1073741824k,mode=1777     0       1
