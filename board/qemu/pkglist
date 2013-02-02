@@ -5,6 +5,7 @@ iw;git;http://git.sipsolutions.net/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
 trace-cmd;git;git://git.kernel.org/pub/scm/linux/kernel/git/rostedt/trace-cmd.git;master;
 wmediumd;git;git://github.com/cozybit/wmediumd.git;master;
+wpa_sup_mesh;git;git@github.com:cozybit/hostap-sae.git;master;
 tshark;;;;
 mccatool;;;;
 qemu-cleanups;;;;
