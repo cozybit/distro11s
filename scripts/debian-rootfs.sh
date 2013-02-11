@@ -17,11 +17,11 @@ fi
 echo "Updating package cache"
 sudo chroot ${STAGING} apt-get update
 echo "Install locales support"
-sudo chroot ${STAGING} apt-get install locales
+sudo chroot ${STAGING} apt-get -y install locales
 sudo chroot ${STAGING} sed -i -e "s/^#\s*\(.*$LANG\)/\1/" /etc/locale.gen
 sudo chroot ${STAGING} locale-gen
 echo "Updating base packages"
-sudo chroot ${STAGING} apt-get upgrade
+sudo chroot ${STAGING} apt-get -y upgrade
 sudo chroot ${STAGING} apt-get -y --force-yes --no-install-recommends install ${BOARD11S_PACKAGES} || exit 1
 sudo chroot ${STAGING} apt-get -y build-dep ${BOARD11S_BUILDDEP_PACKAGES} || exit 1
 
