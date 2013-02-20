@@ -12,6 +12,7 @@ function die {
 
 root_check "This script mounts drives and makes file systems."
 IMAGE=${DISTRO11S_OUT}/${DISTRO11S_BOARD}/rootfs.ext3
+sudo cat $STAGING/etc/distro11s-versions.d/* > $STAGING/etc/distro11s-versions
 SIZE=`sudo du -s -B 1k ${STAGING} | awk '{print $1}'`
 # add another 20% for extra modules, programs, etc.
 SIZE=`echo "($SIZE * 120 / 100) + $SIZE" | bc`

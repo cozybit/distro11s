@@ -27,7 +27,7 @@ done
 
 # Go package by package and build
 rm -f ${STAGING}/etc/distro11s-versions
-mkdir -p ${STAGING}/etc/
+mkdir -p ${STAGING}/etc/distro11s-versions.d
 
 PACKAGES=`cat ${PKGLIST}`
 for p in ${PACKAGES}; do
@@ -45,12 +45,5 @@ for p in ${PACKAGES}; do
 	echo "Building ${NAME}"
 	$S || exit $?
 
-	# Add versioning for each package
-	VERSION=`pkg_version ${VCS} ${SRCDIR}`
-	if [ "${VERSION}" = "" ]; then
-		echo ${NAME} "[builtin to distro11s]" >> ${STAGING}/etc/distro11s-versions
-	else
-		echo ${NAME} ${URL} `pkg_version ${VCS} ${SRCDIR}`>> ${STAGING}/etc/distro11s-versions
-	fi
 done
 echo "distro11s build complete."

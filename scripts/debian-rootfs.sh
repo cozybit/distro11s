@@ -9,6 +9,7 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 	sudo chmod -R a+r ${STAGING}/
 	sudo chmod a+x ${STAGING}/root
 	sudo chmod a+x ${STAGING}/ldconfig
+	mkdir -p ${STAGING}/etc/distro11s-versions.d
 	echo "Adding source URIs to sources.list"
 	cat ${STAGING}/etc/apt/sources.list | sed -e 's/^deb/deb-src/' >> ${STAGING}/etc/apt/sources.list
 	touch ${STAMPS}/debian-rootfs.bootstrapped
@@ -29,7 +30,7 @@ cp ${DISTRO11S_CONF} ${STAGING}/etc/distro11s.conf || exit 1
 
 if [ "${DISTRO11S_RELEASE_VERSION}" = "" ]; then
 	Q pushd ${TOP}
-	echo "distro11s development " `git log | head -1 | awk '{print $2}'` >> ${STAGING}/etc/distro11s-versions
+	echo "distro11s development " `git log | head -1 | awk '{print $2}'` > ${STAGING}/etc/distro11s-versions.d/distro11s
 else
-	echo "distro11s release ${DISTRO11S_RELEASE_VERSION}" >> ${STAGING}/etc/distro11s-versions
+	echo "distro11s release ${DISTRO11S_RELEASE_VERSION}" > ${STAGING}/etc/distro11s-versions.d/distro11s
 fi

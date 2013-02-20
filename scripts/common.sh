@@ -95,11 +95,22 @@ function parse_pkg {
 
 # do a command if the specified stamp file $1 does not exist.
 function do_stamp_cmd {
+	PKG=`echo ${1} | cut -d '.' -f 1`
 	STAMPFILE=${STAMPS}/${1}
 	shift 1
 	if [ ! -e ${STAMPFILE} -o ${FORCE_BUILD} -eq 1 ]; then
 		eval "$*" || exit 1
 		touch ${STAMPFILE}
+	fi
+	VERSION_FILE=${STAGING}/etc/distro11s-versions.d/${PKG}
+	if [ -d src/${PKG} ]; then
+	# Add versioning for each package
+		VERSION=`pkg_version git src/${PKG}`
+		if [ "${VERSION}" = "" ]; then
+			echo ${NAME} "[builtin to distro11s]" >> ${VERSION_FILE}
+	else
+			echo ${PKG} ${VERSION} > ${VERSION_FILE}
+		fi
 	fi
 }
 
@@ -139,7 +150,17 @@ function root_check {
 function pkg_version {
 	if [ ${1} = "git" ]; then
 		Q pushd ${2}
-		git log | head -1 | awk '{print $2}'
+		INFO=`git branch -v | grep '*' | awk '{print $2, $3}'`
+		# if not on a branch INFO will be (no branch)
+		LOCAL_BRANCH=`git name-rev --name-only HEAD`
+		TRACKING_REMOTE=`git config branch.$LOCAL_BRANCH.remote`
+		if [ "${TRACKING_REMOTE}" = "" ]; then
+			REMOTE_URL="(dev no-remote)"
+		else
+		REMOTE_URL=`git config remote.$TRACKING_REMOTE.url`
+		fi
+		echo ${INFO} ${REMOTE_URL}
+		Q popd
 	elif [ ${1} = "svn" ]; then
 		Q pushd ${2}
 		git svn log 2> /dev/null | head -2 | tail -1 | awk '{print $1}'
