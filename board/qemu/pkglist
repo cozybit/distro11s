@@ -1,6 +1,6 @@
 debian-rootfs;;;;
 kernel;git;git://github.com/cozybit/open80211s.git;master;
-libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;
+libnl;git;git://git.infradead.org/users/tgr/libnl.git;master;libnl3_2_16
 iw;git;git://git.kernel.org/pub/scm/linux/kernel/git/jberg/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
 trace-cmd;git;git://git.kernel.org/pub/scm/linux/kernel/git/rostedt/trace-cmd.git;master;
