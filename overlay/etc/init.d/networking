@@ -68,6 +68,9 @@ auto ${1}
 iface ${1} inet static
  address ${2}
  netmask ${3}
+
+auto lo
+iface lo inet loopback
 EOF
 )" > /etc/network/interfaces
 }
