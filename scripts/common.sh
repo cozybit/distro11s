@@ -106,11 +106,16 @@ function do_stamp_cmd {
 	if [ -d src/${PKG} ]; then
 	# Add versioning for each package
 		VERSION=`pkg_version git src/${PKG}`
-		if [ "${VERSION}" = "" ]; then
-			echo ${NAME} "[builtin to distro11s]" >> ${VERSION_FILE}
 	else
-			echo ${PKG} ${VERSION} > ${VERSION_FILE}
+		# check if i'm already in the directory of the package source
+		if pwd | grep -q src/"${PKG}"$; then
+			VERSION=`pkg_version git .`
 		fi
+	fi
+	if [ "${VERSION}" = "" ]; then
+		echo ${PKG} "[builtin to distro11s]" > ${VERSION_FILE}
+	else
+		echo ${PKG} ${VERSION} > ${VERSION_FILE}
 	fi
 }
 
@@ -151,6 +156,11 @@ function pkg_version {
 	if [ ${1} = "git" ]; then
 		Q pushd ${2}
 		INFO=`git branch -v | grep '*' | awk '{print $2, $3}'`
+		if [ "${INFO}" = "(no branch)" ]; then
+			#not on a branch, we want to log SHA anyway
+			CURR_HEAD=`git log -n1 --format=%H`
+			INFO="${INFO} ${CURR_HEAD}"
+		fi
 		# if not on a branch INFO will be (no branch)
 		LOCAL_BRANCH=`git name-rev --name-only HEAD`
 		TRACKING_REMOTE=`git config branch.$LOCAL_BRANCH.remote`
