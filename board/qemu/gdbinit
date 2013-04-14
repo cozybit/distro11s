@@ -6,6 +6,6 @@ file vmlinux
 # kernel.
 # check /proc/modules if these aren't right.
 add-symbol-file net/wireless/cfg80211.o 0xffffffffa0000000
-add-symbol-file net/mac80211/mac80211.o 0xffffffffa003c000
-add-symbol-file drivers/net/wireless/mac80211_hwsim.o 0xffffffffa00fc000
+add-symbol-file net/mac80211/mac80211.o 0xffffffffa00b4000
+add-symbol-file drivers/net/wireless/mac80211_hwsim.o 0xffffffffa019900
 continue
