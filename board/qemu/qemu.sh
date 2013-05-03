@@ -60,9 +60,18 @@ if [ "${CHECK}" == "" ]; then
     QEMU=qemu
 fi
 
+# virtfs rootfs
+#	-append "root=root rw rootflags=rw,trans=virtio,version=9p2000.L rootfstype=9p combined_mode=ide console=ttyS0" \
+#	-fsdev local,id=root,path=${STAGING},security_model=none \
+#	-device virtio-9p-pci,fsdev=root,mount_tag=/dev/root \
+[ -z "$DISTRO11S_VIRTFS_MOUNT_SRC" ] && DISTRO11S_VIRTFS_MOUNT_SRC="/home"
 ${QEMU} -nographic -kernel ${KERNEL} \
 	-hda ${ROOTFS} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
+	-fsdev local,id=modules,path=${STAGING}/lib/modules,security_model=mapped-xattr \
+	-fsdev local,id=misc,path=${DISTRO11S_VIRTFS_MOUNT_SRC},security_model=mapped-xattr \
+	-device virtio-9p-pci,fsdev=modules,mount_tag=modules \
+	-device virtio-9p-pci,fsdev=home,mount_tag=misc \
 	-device e1000,netdev=lan0,mac=52:54:00:12:34:$((56 + IDX)) \
 	-netdev tap,id=lan0,ifname=$IFNAME,script=no \
 	-enable-kvm -smp 2 \

@@ -81,4 +81,11 @@ sudo ln -fs ${STAGING}/usr/local/sbin/iw ${STAGING}/sbin/iw
 # Make tshark run capture as root
 sudo sed -i -e 's/running_superuser/false/' ${STAGING}/usr/share/wireshark/init.lua
 
+# Enable virtfs mounts
+[ -z "$DISTRO11S_VIRTFS_MOUNT_DST" ] && DISTRO11S_VIRTFS_MOUNT_DST="/home"
+echo "
+misc $DISTRO11S_VIRTFS_MOUNT_DST 9p	trans=virtio,version=9p2000.L 0	0
+modules /lib/modules 9p trans=virtio,version=9p2000.L 0 0
+" > ${STAGING}/etc/fstab
+
 touch ${STAMPS}/qemu-cleanups
