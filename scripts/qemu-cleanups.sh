@@ -88,4 +88,7 @@ misc $DISTRO11S_VIRTFS_MOUNT_DST 9p	trans=virtio,version=9p2000.L 0	0
 modules /lib/modules 9p trans=virtio,version=9p2000.L 0 0
 " > ${STAGING}/etc/fstab
 
+# set the hostname
+[ -z "$DISTRO11S_HOSTNAME" ] ||  echo ${DISTRO11S_HOSTNAME} > ${STAGING}/etc/hostname
+
 touch ${STAMPS}/qemu-cleanups
