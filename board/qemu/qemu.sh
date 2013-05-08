@@ -68,8 +68,8 @@ fi
 ${QEMU} -nographic -kernel ${KERNEL} \
 	-hda ${ROOTFS} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
-	-fsdev local,id=modules,path=${STAGING}/lib/modules,security_model=mapped-xattr \
-	-fsdev local,id=misc,path=${DISTRO11S_VIRTFS_MOUNT_SRC},security_model=mapped-xattr \
+	-fsdev local,id=modules,path=${STAGING}/lib/modules,security_model=mapped \
+	-fsdev local,id=misc,path=${DISTRO11S_VIRTFS_MOUNT_SRC},security_model=mapped \
 	-device virtio-9p-pci,fsdev=modules,mount_tag=modules \
 	-device virtio-9p-pci,fsdev=misc,mount_tag=misc \
 	-device e1000,netdev=lan0,mac=52:54:00:12:34:$((56 + IDX)) \
