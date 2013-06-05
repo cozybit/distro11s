@@ -144,6 +144,9 @@ function root_check {
 	if [ ${USER} != root ]; then
 		if sudo -n ls &> /dev/null; then
 			echo "Active sudo credentials found, proceeding..."
+		elif ! tty -s; then
+			echo "Error: no sudo for non-interactive user ${USER}"
+			exit -42
 		else
 			MSG="Use sudo? [Yn]"
 			warn_user ${*}
@@ -262,3 +265,5 @@ export LDFLAGS="-L${STAGING}/lib -L${STAGING}/usr/lib -L${STAGING}/usr/local/lib
 if [ "${FORCE_BUILD}" = "" ]; then
 	FORCE_BUILD=0
 fi
+
+root_check
