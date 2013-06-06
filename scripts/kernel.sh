@@ -28,6 +28,9 @@ fi
 HEAD_SHA=`git log --oneline -n1 | awk '{print $1}'`
 sed -i "s/^\(EXTRAVERSION =\($\| -rc[[:digit:]]*\)\).*$/\1-${HEAD_SHA}/" Makefile
 
+# if compat-drivers are in /updates, remove them
+[ -e ${STAGING}/lib/modules/*/updates ] && sudo rm -fr ${STAGING}/lib/modules/*/updates
+
 GDBINIT="${TOP}/board/${DISTRO11S_BOARD}/gdbinit"
 [ -e "$GDBINIT" ] && cp $GDBINIT ./.gdbinit
 do_stamp_cmd kernel.config cp ${CONFIG} ./.config
