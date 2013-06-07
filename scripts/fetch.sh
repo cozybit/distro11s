@@ -55,7 +55,7 @@ for p in `cat ${PKGLIST}`; do
 			Q popd
 		fi
 		# make sure package rebuilds if we blew away src dir to start from scratch
-		Q "rm ${TOP}/out/${DISTRO11S_BOARD}/stamps/${NAME}*"
+		Q "rm -f ${TOP}/out/${DISTRO11S_BOARD}/stamps/${NAME}*"
 	fi
 done
 echo "all distro11s source packages fetched"
