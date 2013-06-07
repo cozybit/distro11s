@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source `dirname $0`/common.sh
 
 if [ -e ${STAMPS}/make_ext3fs -a ! ${FORCE_BUILD} -eq 1 ]; then
