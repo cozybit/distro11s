@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 source `dirname $0`/common.sh
 
@@ -12,6 +12,7 @@ make clean
 # build
 do_stamp_cmd compat.make KLIB_BUILD=$kernel_src KLIB=$kernel_src
 # install
+echo 'installing compat drivers'
 sudo make KLIB_BUILD=$kernel_src KLIB=$kernel_src KMODPATH_ARG="INSTALL_MOD_PATH=${STAGING}" install-modules
 
 echo 'done installing compat drivers'
