@@ -125,6 +125,7 @@ EOF
 	sudo cp /usr/bin/grub-* ${DRIVE}/usr/bin/ || exit 1
 	sudo cp /usr/sbin/grub-* ${DRIVE}/usr/sbin/ || exit 1
 	sudo cp -r /usr/lib/grub ${DRIVE}/usr/lib/
+	sudo chroot ${DRIVE} apt-get update || exit 1
 	sudo chroot ${DRIVE} apt-get -f install -y --force-yes || exit 1
 	sudo chroot ${DRIVE} apt-get update
 	sudo chroot ${DRIVE} apt-get -y --force-yes install sudo libdevmapper1.02.1 || exit 1
