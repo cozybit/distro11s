@@ -82,11 +82,10 @@ ${QEMU} -nographic -kernel ${KERNEL} \
 #    /etc/modprobe.d/blacklist-carl9170.conf that contains: blacklist carl9170).
 # 2. Add the usb driver to your build
 # 3. Claim ownership of the device by passing the following arguments to qemu:
-#	-usb -usbdevice host:07d1:3c10
-#    The above vendor ID correspond to the ar9170.  Modify if needed.  Look
-#    this up with lsusb on your host.
-# 4. If the device requires firmware, don't forget to add it to your guest
-# rootfs.
+#	- usb \
+#	-device usb-ehci,id=ehci \
+#	-device usb-host,vendorid=0x0cf3,productid=0x9271,bus=ehci.0 \
+# (0cf3:9271 is for a tp-link wn721n (ath9k_htc))
 
 # qemu will block here until it is done.  When it returns, we'll eliminate the
 # tap iface.
