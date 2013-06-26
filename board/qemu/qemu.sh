@@ -19,6 +19,7 @@ function die {
 	# HACK: only delete bridge when instance 0 is brought down, which requires
 	# that you halt qemu.sh 0 last
 	[ "${IDX}" -eq 0 ] && sudo brctl delbr ${DISTRO11S_BRIDGE}
+	[ -e "${STAGING}/qemu-${IDX}.pid" ] && rm -f "${STAGING}/qemu-${IDX}.pid"
 	exit $1
 }
 
@@ -76,6 +77,7 @@ ${QEMU} -nographic -kernel ${KERNEL} \
 	-netdev tap,id=lan0,ifname=$IFNAME,script=no \
 	-enable-kvm -smp 2 \
 	-gdb tcp::$((1234 + IDX))
+	-pidfile ${STAMPS}/qemu-${IDX}.pid
 
 # To add a usb device to your qemu build:
 # 1. Make sure you blacklist the module on your host (e.g add blacklist file on 
