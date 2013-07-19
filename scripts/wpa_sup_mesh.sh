@@ -13,8 +13,8 @@ if [ ! -e ${CONFIG} ]; then
 	echo "No config for hostapd in ${CONFIG}, using default"
 	CONFIG=defconfig
 fi
-do_stamp_cmd hostapd.config cp ${CONFIG} ${STAGING}/src/wpa_sup_mesh/wpa_supplicant/.config
-do_stamp_cmd hostapd.make sudo chroot ${STAGING} /wpa_sup_mesh.sh
+do_stamp_cmd wpa_sup_mesh.config cp ${CONFIG} ${STAGING}/src/wpa_sup_mesh/wpa_supplicant/.config
+do_stamp_cmd wpa_sup_mesh.make sudo chroot ${STAGING} /wpa_sup_mesh.sh
 
 sudo umount ${STAGING}/src
 rm -f ${STAGING}/wpa_sup_mesh.sh
