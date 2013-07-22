@@ -10,5 +10,6 @@ linux-firmware;git;git://git.kernel.org/pub/scm/linux/kernel/git/dwmw2/linux-fir
 tshark;;;;
 mccatool;;;;
 qemu-cleanups;;;;
+rootpassword;;;;
 overlay;;;;
 make_ext3fs;;;;
