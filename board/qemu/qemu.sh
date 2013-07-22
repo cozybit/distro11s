@@ -76,7 +76,7 @@ ${QEMU} -nographic -kernel ${KERNEL} \
 	-device e1000,netdev=lan0,mac=52:54:00:12:34:$((56 + IDX)) \
 	-netdev tap,id=lan0,ifname=$IFNAME,script=no \
 	-enable-kvm -smp 2 \
-	-gdb tcp::$((1234 + IDX))
+	-gdb tcp::$((1234 + IDX)) \
 	-pidfile ${STAMPS}/qemu-${IDX}.pid
 
 # To add a usb device to your qemu build:
