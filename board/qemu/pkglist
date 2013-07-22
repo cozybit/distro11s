@@ -9,5 +9,6 @@ wpa_sup_mesh;git;git@github.com:cozybit/wpa_supplicant.git;master;
 linux-firmware;git;git://git.kernel.org/pub/scm/linux/kernel/git/dwmw2/linux-firmware.git;master;
 mccatool;;;;
 qemu-cleanups;;;;
+rootpassword;;;;
 overlay;;;;
 make_ext3fs;;;;
