@@ -8,5 +8,5 @@ source `dirname $0`/common.sh
 do_stamp_cmd overlay.distro11s cp -r ${TOP}/overlay/* ${STAGING}
 
 if [ -d ${TOP}/board/${DISTRO11S_BOARD}/overlay ]; then
-	do_stamp_cmd overlay.board cp -r ${TOP}/board/${DISTRO11S_BOARD}/overlay/* ${STAGING}
+	do_stamp_cmd overlay.board sudo cp -r ${TOP}/board/${DISTRO11S_BOARD}/overlay/* ${STAGING}
 fi
