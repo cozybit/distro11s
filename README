@@ -204,6 +204,9 @@ TIPS AND TRICKS
    Note: you can customize the range of nodes you would like to sync by setting
    DISTRO11S_START_NODE and DISTRO11S_END_NODE in your distro11s.conf.
 
+   Note: to connect to qemu with gdb, while inside gdb type:
+   (gdb) target remote ${DISTRO11S_HOST_IP}:1234
+
 -- If you are working on an older machine that does not support hardware
    virtualization, you will have to disable kvm:
 
