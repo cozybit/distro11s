@@ -93,7 +93,7 @@ if [ "${ISVALID}" != "0" ]; then
        echo "Creating grub config file"
        echo "$(cat <<EOF
 set root=(hd0,msdos1)
-linux /boot/bzImage root=/dev/sda1
+linux /boot/bzImage root=/dev/sda1 sysrq=1 console=ttyS0,115200n8
 boot
 EOF
 )" > /tmp/grub.cfg

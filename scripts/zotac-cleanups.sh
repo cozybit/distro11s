@@ -52,3 +52,6 @@ add_text '*/20 * * * * /usr/local/bin/peerstats >> /var/log/peerstats.log' ${STA
 add_text '1 */1 * * * /usr/sbin/logrotate /etc/logrotate.conf' ${STAGING}/tmp/mycron
 sudo chroot ${STAGING} crontab /tmp/mycron
 sudo rm ${STAGING}/tmp/mycron
+
+# enable login on ttyS0
+echo "TO:23:respawn:/sbin/getty -L ttyS0 115200 vt100" >> $STAGING/etc/inittab
