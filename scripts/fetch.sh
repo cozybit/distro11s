@@ -40,10 +40,10 @@ for p in `cat ${PKGLIST}`; do
 
 	if [ -e  ${SRCDIR} ]; then
 		echo "UPDATING: ${SRCDIR}"
-		update ${VCS} ${SRCDIR} ${NAME} ${TAG} || exit 1
+		update_pkg || exit 1
 	else
 		echo "FETCHING: ${NAME}"
-		fetch ${VCS} ${NAME} ${URL} ${BRANCH} ${TAG} || exit 1
+		fetch_pkg || exit 1
 		if [ -d ${TOP}/patches/${NAME} ]; then
 			Q pushd ${SRCDIR}
 			git am ${TOP}/patches/${NAME}/* || exit 1
