@@ -40,9 +40,6 @@ function fetch {
 			git reset --hard ${5}
 			popd
 		fi
-	elif [ ${1} = "svn" ]; then
-		git svn clone ${3} ${DEST}
-		#TODO: implement git reset --hard ${TAG} for git-svn
 	else
 		echo "Unsupported version control system ${1}"
 		return 1
@@ -55,11 +52,6 @@ function update {
 		Q pushd ${2}
 		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 		[ "${4}" == "" ] && git pull --rebase
-		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
-	elif [ ${1} = "svn" ]; then
-		Q pushd ${2}
-		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
-		[ "${4}" == "" ] && git svn rebase
 		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	else
 		echo "Unsupported version control system ${1}"
@@ -174,9 +166,6 @@ function pkg_version {
 		fi
 		echo ${INFO} ${REMOTE_URL}
 		Q popd
-	elif [ ${1} = "svn" ]; then
-		Q pushd ${2}
-		git svn log 2> /dev/null | head -2 | tail -1 | awk '{print $1}'
 	else
 		return 1
 	fi
