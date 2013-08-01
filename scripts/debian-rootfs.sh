@@ -17,6 +17,10 @@ fi
 
 echo "Updating package cache"
 sudo chroot ${STAGING} apt-get update
+echo "Fixing old installation issues"
+# Fix for the old force-installed tshark 1.9.0
+sudo chroot ${STAGING} apt-get -y remove tshark wireshark-common libwireshark3
+sudo chroot ${STAGING} apt-get -y -f install
 echo "Install locales support"
 sudo chroot ${STAGING} apt-get -y install locales
 sudo chroot ${STAGING} sed -i -e "s/^#\s*\(.*$LANG\)/\1/" /etc/locale.gen
