@@ -49,7 +49,26 @@ function update_pkg {
 	if [ ${VCS} = "git" ]; then
 		Q pushd ${SRCDIR}
 		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
-		[ "${TAG}" == "" ] && git pull --rebase
+		if [ "${BRANCH}" != `git rev-parse --abbrev-ref HEAD` ]; then
+			if [ ${FORCE_BUILD} -eq 1 ]; then
+				git remote rm origin
+				git remote add origin ${URL}
+				git remote update origin
+				if [ "${BRANCH}" = "" ]; then
+					git branch -D ${BRANCH}
+					git checkout -b ${BRANCH} origin/${BRANCH}
+				else
+					git branch -D master
+					git checkout -b ${BRANCH} origin/master
+				fi
+			else
+				echo "WARNING: skipping update of ${NAME} in ${SRCDIR}"
+				echo "	${SRCDIR} not presently on ${BRANCH}"
+				echo "	use FORCE_BUILD=1 to override or cleanup manually"
+			fi
+		elif [ "${TAG}" == "" ]; then
+			git pull --rebase
+		fi
 		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	else
 		echo "Unsupported version control system ${VCS}"
