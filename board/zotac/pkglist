@@ -10,7 +10,6 @@ hostap;git;git://w1.fi/srv/git/hostap.git;master;
 mccatool;;;;
 hostapd;;;;
 rootpassword;;;;
-tshark;;;;
 meshkit;;;;
 overlay;;;;
 zotac-cleanups;;;;
