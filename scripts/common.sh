@@ -20,54 +20,52 @@ function set_top {
 	return 1
 }
 
-# fetch ${VCS} ${NAME} ${URL} ${BRANCH} ${TAG}
-function fetch {
+function fetch_pkg {
 	DEST=${DISTRO11S_SRC}/${NAME}
-	if [ ${1} = "git" ]; then
+	if [ ${VCS} = "git" ]; then
 		GIT="git clone"
-		if [ "${DISTRO11S_GIT_REFERENCE}" != "" -a -e ${DISTRO11S_GIT_REFERENCE}/${2} ]; then
-			GIT="${GIT} --reference ${DISTRO11S_GIT_REFERENCE}/${2}"
+		if [ "${DISTRO11S_GIT_REFERENCE}" != "" -a -e ${DISTRO11S_GIT_REFERENCE}/${NAME} ]; then
+			GIT="${GIT} --reference ${DISTRO11S_GIT_REFERENCE}/${NAME}"
 		fi
 		echo "${GIT}"
-		if [ "${4}" = "" ]; then
-			${GIT} ${3} ${DEST}
+		if [ "${BRANCH}" = "" ]; then
+			${GIT} ${URL} ${DEST}
 		else
-			${GIT} ${3} -b ${4} ${DEST}
+			${GIT} ${URL} -b ${BRANCH} ${DEST}
 		fi
-		if [ "${5}" != "" ] ; then
+		if [ "${TAG}" != "" ] ; then
 			pushd .
 			cd ${DEST}
-			git reset --hard ${5}
+			git reset --hard ${TAG}
 			popd
 		fi
 	else
-		echo "Unsupported version control system ${1}"
+		echo "Unsupported version control system ${VCS}"
 		return 1
 	fi
 }
 
-# update ${VCS} ${DIR} ${NAME} ${TAG}
-function update {
-	if [ ${1} = "git" ]; then
-		Q pushd ${2}
+function update_pkg {
+	if [ ${VCS} = "git" ]; then
+		Q pushd ${SRCDIR}
 		CURR_HEAD=`git log --oneline -n1 | awk '{print $1}'`
-		[ "${4}" == "" ] && git pull --rebase
+		[ "${TAG}" == "" ] && git pull --rebase
 		NEW_HEAD=`git log --oneline -n1 | awk '{print $1}'`
 	else
-		echo "Unsupported version control system ${1}"
+		echo "Unsupported version control system ${VCS}"
 		return 1
 	fi
 
 	if [ "${CURR_HEAD}" != "${NEW_HEAD}" ]; then
 		# we had updates, clear the stamps, ignore missing
-		Q "rm ${TOP}/out/${DISTRO11S_BOARD}/stamps/${3}*" || continue
+		Q "rm ${TOP}/out/${DISTRO11S_BOARD}/stamps/${NAME}*" || continue
 	fi
 
-	if [ "${4}" != "" ]; then
+	if [ "${TAG}" != "" ]; then
 		Q pushd .
-		cd ${2}
+		cd ${SRCDIR}
 		git fetch
-		git checkout -q ${4}
+		git checkout -q ${TAG}
 		Q popd
 	fi
 }
