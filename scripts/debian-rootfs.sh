@@ -1,5 +1,12 @@
 source `dirname $0`/common.sh
 
+function clean_install_state {
+	echo "Fixing installation issues"
+	# Cleanup any failed package installs/upgrades
+	yes "" | sudo chroot ${STAGING} dpkg --configure -a --force-all
+	yes "" | sudo chroot ${STAGING} aptitude -y -f install
+}
+
 if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 	root_check "This script runs debootstrap in ${STAGING}"
 	echo "Populating base rootfs with debian"
@@ -16,19 +23,18 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 fi
 
 echo "Updating package cache"
-sudo chroot ${STAGING} apt-get update
-echo "Fixing old installation issues"
-# Fix for the old force-installed tshark 1.9.0
-sudo chroot ${STAGING} apt-get -y remove tshark wireshark-common libwireshark3
-sudo chroot ${STAGING} apt-get -y -f install
+sudo chroot ${STAGING} aptitude update
+clean_install_state
+echo "Updating installed packages"
+yes "" | sudo chroot ${STAGING} aptitude -y full-upgrade
+clean_install_state
 echo "Install locales support"
-sudo chroot ${STAGING} apt-get -y install locales
+yes "" | sudo chroot ${STAGING} aptitude -y install locales
 sudo chroot ${STAGING} sed -i -e "s/^#\s*\(.*$LANG\)/\1/" /etc/locale.gen
 sudo chroot ${STAGING} locale-gen
 echo "Updating base packages"
-sudo chroot ${STAGING} apt-get -y upgrade
-sudo chroot ${STAGING} apt-get -y --force-yes --no-install-recommends install ${BOARD11S_PACKAGES} || exit 1
-sudo chroot ${STAGING} apt-get -y build-dep ${BOARD11S_BUILDDEP_PACKAGES} || exit 1
+yes "" | sudo chroot ${STAGING} aptitude -y --without-recommends install ${BOARD11S_PACKAGES} || exit 1
+yes "" | sudo chroot ${STAGING} aptitude -y build-dep ${BOARD11S_BUILDDEP_PACKAGES} || exit 1
 
 cp ${DISTRO11S_CONF} ${STAGING}/etc/distro11s.conf || exit 1
 
