@@ -6,6 +6,8 @@
 # spoof it into thinking that it is on a development machine as opposed to a
 # deployed machine.
 
+DISTRO11S_LOG="/tmp/distro11s_install.log"
+
 echo "Checking for provisioning configuration"
 if [ -e /etc/distro11s.conf ]; then
 	source /etc/distro11s.conf
@@ -25,7 +27,8 @@ fi
 export STAGING=/staging
 export KERNEL=/boot/bzImage
 
-/usr/local/bin/provisioning.sh -o -d /dev/sda -n `cat /etc/hostnumber` || exit -1
+/usr/local/bin/provisioning.sh -o -d /dev/sda -n `cat /etc/hostnumber` | tee $DISTRO11S_LOG
+[ "${PIPESTATUS[0]}" -ne 0 ] && { echo "distro11s install failed! check $DISTRO11S_LOG (hit enter to continue)"; read; exit 1}
 
 echo $((`cat /etc/hostnumber` + 1)) > /etc/hostnumber
 
