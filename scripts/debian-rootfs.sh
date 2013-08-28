@@ -11,7 +11,19 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 	root_check "This script runs debootstrap in ${STAGING}"
 	echo "Populating base rootfs with debian"
 	sudo rm -rf ${STAGING}/*
-	sudo debootstrap sid ${STAGING} http://ftp.debian.org/debian || exit 1
+	case ${DISTRO11S_BOARD} in
+	zotac | qemu)
+		sudo debootstrap sid ${STAGING} http://ftp.debian.org/debian || exit 1
+	;;
+	arm-chroot)
+		sudo debootstrap --arch=armel --foreign sid ${STAGING} http://http.debian.net/debian || exit 1
+		sudo cp /usr/bin/qemu-arm-static ${STAGING}/usr/bin
+		sudo chroot ${STAGING} /debootstrap/debootstrap --second-stage
+		sudo chmod -R a+w ${STAGING}/
+		sudo echo "deb http://ftp.debian.org/debian sid main" > ${STAGING}/etc/apt/sources.list
+	;;
+	*) echo "Failed for unknown host board ${DISTRO11S_BOARD}"; exit ;;
+	esac
 	sudo chmod -R a+w ${STAGING}/
 	sudo chmod -R a+r ${STAGING}/
 	sudo chmod a+x ${STAGING}/root
