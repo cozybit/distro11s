@@ -71,6 +71,14 @@ sudo chmod 644 -R ${STAGING}/root/
 sudo chmod 600 ${STAGING}/root/.ssh/id_rsa
 sudo chown -R root.root ${STAGING}/root
 
+# Install host keys in known_hosts
+echo "Updating known_hosts keys for ${DISTRO11S_STATIC_IP}"
+ssh-keygen -H -R ${DISTRO11S_STATIC_IP}:22
+for keyfile in `ls ${STAGING}/etc/ssh/ssh_host*_key`; do
+	echo ${DISTRO11S_STATIC_IP}:22 `sudo ssh-keygen -y -f ${keyfile}` >> ~/.ssh/known_hosts
+done
+ssh-keygen -H
+
 # set regulatory domain
 echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
 echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
