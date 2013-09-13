@@ -54,7 +54,9 @@ function update_pkg {
 				git remote rm origin
 				git remote add origin ${URL}
 				git remote update origin
-				if [ "${BRANCH}" = "" ]; then
+				if [ "${TAG}" != "" ]; then
+					git checkout -q ${TAG}
+				elif [ "${BRANCH}" = "" ]; then
 					git branch -D ${BRANCH}
 					git checkout -b ${BRANCH} origin/${BRANCH}
 				else
