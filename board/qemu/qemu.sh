@@ -68,6 +68,7 @@ fi
 [ -z "$DISTRO11S_VIRTFS_MOUNT_SRC" ] && DISTRO11S_VIRTFS_MOUNT_SRC="/home"
 ${QEMU} -nographic -kernel ${KERNEL} \
 	-hda ${ROOTFS} \
+	-m ${DISTRO11S_QEMU_MEMORY} \
 	-append "root=/dev/sda combined_mode=ide console=ttyS0" \
 	-fsdev local,id=modules,path=${STAGING}/lib/modules,security_model=mapped \
 	-fsdev local,id=misc,path=${DISTRO11S_VIRTFS_MOUNT_SRC},security_model=mapped \
