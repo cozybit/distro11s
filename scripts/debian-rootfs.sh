@@ -13,14 +13,14 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 	sudo rm -rf ${STAGING}/*
 	case ${DISTRO11S_BOARD} in
 	zotac | qemu)
-		sudo debootstrap sid ${STAGING} http://ftp.debian.org/debian || exit 1
+		sudo debootstrap ${DISTRO11S_DEB_RELEASE} ${STAGING} http://ftp.debian.org/debian || exit 1
 	;;
 	arm-chroot)
-		sudo debootstrap --arch=armel --foreign sid ${STAGING} http://http.debian.net/debian || exit 1
+		sudo debootstrap --arch=armel --foreign ${DISTRO11S_DEB_RELEASE} ${STAGING} http://http.debian.net/debian || exit 1
 		sudo cp /usr/bin/qemu-arm-static ${STAGING}/usr/bin
 		sudo chroot ${STAGING} /debootstrap/debootstrap --second-stage
 		sudo chmod -R a+w ${STAGING}/
-		sudo echo "deb http://ftp.debian.org/debian sid main" > ${STAGING}/etc/apt/sources.list
+		sudo echo "deb http://ftp.debian.org/debian ${DISTRO11S_DEB_RELEASE} main" > ${STAGING}/etc/apt/sources.list
 	;;
 	*) echo "Failed for unknown host board ${DISTRO11S_BOARD}"; exit ;;
 	esac
