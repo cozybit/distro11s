@@ -66,7 +66,7 @@ if [ "${ISVALID}" != "0" ]; then
    count=5
    while [ ${count} -gt 0 ]; do
        [ -e ${DEV}1 ] && break
-       count=$((${count}+1))
+       count=$((${count}-1))
        sleep 1
    done
    [ ! -e ${DEV}1 ] && { echo "Error: failed to find new partition ${DEV}1"; exit 1;}
