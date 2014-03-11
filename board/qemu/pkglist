@@ -5,7 +5,7 @@ iw;git;git://git.kernel.org/pub/scm/linux/kernel/git/jberg/iw.git;master;
 authsae;git;git://github.com/cozybit/authsae.git;master;
 trace-cmd;git;git://git.kernel.org/pub/scm/linux/kernel/git/rostedt/trace-cmd.git;master;
 wmediumd;git;git://github.com/cozybit/wmediumd.git;master;
-wpa_sup_mesh;git;git@github.com:cozybit/wpa_supplicant.git;master;
+wpa_sup_mesh;git;git://github.com/cozybit/wpa_supplicant.git;master;
 linux-firmware;git;git://git.kernel.org/pub/scm/linux/kernel/git/dwmw2/linux-firmware.git;master;
 mccatool;;;;
 qemu-cleanups;;;;
