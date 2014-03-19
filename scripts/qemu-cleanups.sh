@@ -81,7 +81,7 @@ ssh-keygen -H
 
 # set regulatory domain
 echo "configuring regulatory domain: ${DISTRO11S_REGDOMAIN}"
-echo "sed -i \"s/^REGDOMAIN=/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
+echo "sed -i \"s/^REGDOMAIN=.*/REGDOMAIN=${DISTRO11S_REGDOMAIN}/\" ${STAGING}/etc/default/crda" | sudo sh
 # CRDA debian package expects iw in /usr/sbin/ and /sbin/
 sudo ln -fs ${STAGING}/usr/local/sbin/iw ${STAGING}/usr/sbin/iw
 sudo ln -fs ${STAGING}/usr/local/sbin/iw ${STAGING}/sbin/iw
