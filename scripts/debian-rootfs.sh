@@ -27,7 +27,7 @@ if [ ! -e  ${STAMPS}/debian-rootfs.bootstrapped -o ${FORCE_BUILD} -eq 1 ]; then
 	sudo chmod -R a+w ${STAGING}/
 	sudo chmod -R a+r ${STAGING}/
 	sudo chmod a+x ${STAGING}/root
-	sudo chmod a+x ${STAGING}/ldconfig
+	sudo chmod a+x ${STAGING}/sbin/ldconfig
 	mkdir -p ${STAGING}/etc/distro11s-versions.d
 	echo "Adding source URIs to sources.list"
 	cat ${STAGING}/etc/apt/sources.list | sed -e 's/^deb/deb-src/' >> ${STAGING}/etc/apt/sources.list
