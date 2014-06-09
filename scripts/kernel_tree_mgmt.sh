@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright (c) 2013 cozybit Inc.
+#
+# All rights reserved
+#
 
 # This script allows to run some of the basic management tasks needed by the
 # o11s development workflow (see more in ${DISTRO11S}/doc/open80211s-kernel.txt)

@@ -1,4 +1,8 @@
 source `dirname $0`/common.sh
+# Copyright (c) 2013 cozybit Inc.
+#
+# All rights reserved
+#
 
 function clean_install_state {
 	echo "Fixing installation issues"

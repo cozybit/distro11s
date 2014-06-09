@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright (c) 2013 cozybit Inc.
+#
+# All rights reserved
+#
 source `dirname $0`/common.sh
 
 # Automatically login as root

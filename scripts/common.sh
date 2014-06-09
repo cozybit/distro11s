@@ -1,3 +1,7 @@
+# Copyright (c) 2013 cozybit Inc.
+#
+# All rights reserved
+#
 # Run a command quietly
 function Q {
 	$* > /dev/null

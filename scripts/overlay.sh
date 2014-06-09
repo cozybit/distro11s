@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright (c) 2013 cozybit Inc.
+#
+# All rights reserved
+#
 
 # Pretty simple package.  Allow a local and board-specific overlay file system.
 # This allows us to cleanly add and alter files such as /etc/init.d/* with our

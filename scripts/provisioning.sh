@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright (c) 2013 cozybit Inc.
+#
+# All rights reserved
+#
 
 DRIVE=/mnt/distross
 USAGE="Usage: ${0} [-d <device>] [-h] [-i] [-r] [-n <name>] [-v]"
